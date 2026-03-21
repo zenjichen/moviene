@@ -259,6 +259,39 @@ function App() {
     }
   }, []);
 
+  // Typewriter effect for browser tab title
+  useEffect(() => {
+    const fullTitle = 'Hà Movie House - Xem Phim Online Miễn Phí 🎬';
+    let i = 0;
+    let isDeleting = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      if (!isDeleting) {
+        document.title = fullTitle.slice(0, i + 1);
+        i++;
+        if (i >= fullTitle.length) {
+          isDeleting = true;
+          timer = setTimeout(tick, 2000); // pause before deleting
+          return;
+        }
+        timer = setTimeout(tick, 100); // typing speed
+      } else {
+        document.title = fullTitle.slice(0, i);
+        i--;
+        if (i <= 0) {
+          isDeleting = false;
+          timer = setTimeout(tick, 500); // pause before retyping
+          return;
+        }
+        timer = setTimeout(tick, 50); // deleting speed (faster)
+      }
+    };
+
+    timer = setTimeout(tick, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   const handleEnter = () => {
     setSessionCookie('phat_movie_welcome_seen', 'true');
     setShowWelcome(false);
