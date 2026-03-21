@@ -42,7 +42,7 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
       if (items.length > 0) {
         const randomMovie = items[Math.floor(Math.random() * items.length)];
         const url = getImageUrl(randomMovie.poster_url || randomMovie.thumb_url);
-        
+
         // Preload image
         const img = new Image();
         img.src = url;
@@ -57,16 +57,16 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
   const handleStart = () => {
     // Giai đoạn 1: Xoay nhanh dần và nút biến mất trong 1.5 giây
     setIsAccelerating(true);
-    
+
     setTimeout(() => {
       // Giai đoạn 2: Bùng nổ/Vỡ tan trong 1 giây (Tổng: 2.5s)
       setIsTransitioning(true);
-      
+
       // Đợi cú zoom đạt đỉnh
       setTimeout(() => {
         // Giai đoạn 3: Hiện màn trắng và bắt đầu mờ dần vào trang chủ (Tổng: 4.0s)
         setShowWhiteFade(true);
-        
+
         // Màn trắng mờ dần trong 1.5 giây
         setTimeout(() => {
           onEnter();
@@ -76,42 +76,41 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
   };
 
   return (
-    <div 
+    <div
       className={`fixed inset-0 z-[999] flex items-center justify-center bg-slate-950 overflow-hidden transition-all duration-[1500ms] ${showWhiteFade ? 'opacity-0' : 'opacity-100'}`}
-      style={{ 
+      style={{
         transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: 'translateZ(0)' 
+        transform: 'translateZ(0)'
       }}
     >
       {/* Lớp màn trắng chuyển cảnh cuối cùng */}
-      <div 
+      <div
         className={`absolute inset-0 z-[100] bg-white transition-opacity duration-[1500ms] pointer-events-none ${showWhiteFade ? 'opacity-100' : 'opacity-0'}`}
         style={{ willChange: 'opacity' }}
       ></div>
 
       {/* Dynamic Background Image - Optimized transition */}
-      <div 
-        className={`absolute inset-0 bg-cover bg-center transition-all duration-[1500ms] ${
-          isTransitioning 
-            ? 'scale-[1.8] opacity-0 blur-2xl' 
+      <div
+        className={`absolute inset-0 bg-cover bg-center transition-all duration-[1500ms] ${isTransitioning
+            ? 'scale-[1.8] opacity-0 blur-2xl'
             : isBgLoaded ? 'opacity-40 blur-sm scale-100' : 'opacity-0 scale-100'
-        }`} 
-        style={{ 
+          }`}
+        style={{
           backgroundImage: bgUrl ? `url(${bgUrl})` : 'none',
           transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: 'transform, opacity, filter',
           transform: 'translateZ(0)'
         }}
       ></div>
-      
+
       {/* Background decoration overlays */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-950/80"></div>
-        <div 
+        <div
           className={`absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/20 blur-[120px] rounded-full transition-transform duration-[1000ms] ${isTransitioning ? 'scale-[3]' : 'scale-100'}`}
           style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
         ></div>
-        <div 
+        <div
           className={`absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 blur-[120px] rounded-full transition-transform duration-[1000ms] ${isTransitioning ? 'scale-[3]' : 'scale-100'}`}
           style={{ transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)' }}
         ></div>
@@ -120,30 +119,30 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
       {/* Speed Lines Effect */}
       {isTransitioning && (
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-            {[...Array(30)].map((_, i) => (
-                <div 
-                    key={i} 
-                    className="absolute bg-white/40 rounded-full animate-hyperspace"
-                    style={{
-                        width: Math.random() * 2 + 1 + 'px',
-                        height: Math.random() * 150 + 100 + 'px',
-                        left: Math.random() * 100 + '%',
-                        top: Math.random() * 100 + '%',
-                        animationDelay: Math.random() * 0.4 + 's',
-                        transform: `rotate(${Math.random() * 360}deg)`,
-                        willChange: 'transform, opacity'
-                    }}
-                ></div>
-            ))}
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute bg-white/40 rounded-full animate-hyperspace"
+              style={{
+                width: Math.random() * 2 + 1 + 'px',
+                height: Math.random() * 150 + 100 + 'px',
+                left: Math.random() * 100 + '%',
+                top: Math.random() * 100 + '%',
+                animationDelay: Math.random() * 0.4 + 's',
+                transform: `rotate(${Math.random() * 360}deg)`,
+                willChange: 'transform, opacity'
+              }}
+            ></div>
+          ))}
         </div>
       )}
 
       {/* Explosive Flash */}
       <div className={`absolute inset-0 bg-white z-[60] pointer-events-none transition-opacity duration-700 ${isTransitioning ? 'opacity-40 animate-flash' : 'opacity-0'}`}></div>
-      
-      <div 
+
+      <div
         className={`relative z-10 text-center flex flex-col items-center px-4 transition-all duration-[1000ms] ${isTransitioning ? 'scale-[12] blur-xl opacity-0' : 'scale-100 animate-in fade-in zoom-in'}`}
-        style={{ 
+        style={{
           transitionTimingFunction: 'cubic-bezier(0.22, 1, 0.36, 1)',
           willChange: 'transform, opacity, filter',
           transform: 'translateZ(0)'
@@ -158,26 +157,26 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
               <div className="absolute -inset-6 bg-gradient-to-l from-indigo-300 via-white to-purple-300 rounded-full animate-spin-slow blur-md opacity-100"></div>
             </>
           )}
-          
+
           <div className="relative w-20 h-20 md:w-28 md:h-28 bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-[0_0_60px_rgba(79,70,229,0.5)] rotate-12 border border-white/20 overflow-hidden">
             <div className={`absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full ${isTransitioning ? 'animate-[shimmer_0.4s_infinite]' : ''}`}></div>
             <Clapperboard size={40} className="text-white -rotate-12 md:hidden" />
             <Clapperboard size={56} className="text-white -rotate-12 hidden md:block" />
           </div>
         </div>
-        
-        <div 
-            className={`transition-all duration-[800ms] ${isTransitioning ? 'opacity-0 translate-y-20 blur-md' : 'opacity-100 translate-y-0'}`}
-            style={{ transitionTimingFunction: 'ease-out' }}
+
+        <div
+          className={`transition-all duration-[800ms] ${isTransitioning ? 'opacity-0 translate-y-20 blur-md' : 'opacity-100 translate-y-0'}`}
+          style={{ transitionTimingFunction: 'ease-out' }}
         >
           <h1 className="text-5xl md:text-9xl font-black italic tracking-[-0.075em] text-white mb-4 md:mb-6 uppercase">
-            HÀ<span className="text-indigo-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.8)]">MOVIE</span><span className="text-slate-300 text-3xl md:text-6xl ml-2">HOUSE</span>
+            HÀ <span className="text-indigo-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.8)]">MOVIE</span><span className="text-slate-300 text-3xl md:text-6xl ml-2"> HOUSE</span>
           </h1>
           <p className="text-slate-400 text-base md:text-2xl mb-8 md:mb-14 max-w-lg mx-auto font-medium tracking-wide">
-            Rạp chiếu phim online miễn phí <br className="hidden md:block"/> <span className="text-slate-500">với chất lượng tuyệt đỉnh.</span>
+            Chào mừng các bạn đến vơi rạp chiếu phim online miễn phí <br className="hidden md:block" /> <span className="text-slate-500">với chất lượng tuyệt đỉnh. Đây là một trong những sản phẩm tạo ra với mục đích học tập và không thương mại hoá !</span>
           </p>
-          
-          <button 
+
+          <button
             onClick={handleStart}
             disabled={isTransitioning || isAccelerating || showWhiteFade}
             className={`group relative inline-flex items-center gap-4 px-10 py-5 md:px-12 md:py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-black text-xl md:text-2xl shadow-[0_10px_40px_rgba(99,102,241,0.4)] hover:shadow-indigo-600/60 hover:scale-105 active:scale-95 transition-all duration-700 overflow-hidden ${isAccelerating ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}`}
@@ -188,7 +187,7 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
             <span className="relative z-10">XEM NGAY</span>
             <div className="absolute inset-0 rounded-full bg-white blur-md opacity-0 group-hover:opacity-20 transition-opacity"></div>
           </button>
-          
+
           <p className="mt-8 md:mt-10 text-slate-600 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] opacity-50">Premium Cinematic Experience</p>
         </div>
       </div>
