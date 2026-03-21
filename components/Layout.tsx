@@ -441,6 +441,148 @@ export const Header = () => {
   );
 };
 
+// === SERVER HEALTH MONITOR ===
+const SERVER_PASS = '1';
+
+interface ServerStatus {
+  name: string;
+  url: string;
+  ping: string;
+  status: 'checking' | 'online' | 'offline';
+  responseTime: number;
+}
+
+export const ServerHealthMonitor = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('shm_auth') === '1');
+  const [passInput, setPassInput] = useState('');
+  const [passError, setPassError] = useState(false);
+  const [servers, setServers] = useState<ServerStatus[]>([
+    { name: 'OPhim (Primary)', url: 'https://ophim1.com/v1/api/danh-sach/phim-moi-cap-nhat?page=1', ping: 'ophim1.com', status: 'checking', responseTime: 0 },
+    { name: 'PhimAPI (Fallback)', url: 'https://phimapi.com/danh-sach/phim-moi-cap-nhat?page=1', ping: 'phimapi.com', status: 'checking', responseTime: 0 },
+    { name: 'NguonC', url: 'https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=1', ping: 'phim.nguonc.com', status: 'checking', responseTime: 0 },
+  ]);
+
+  const checkServers = async () => {
+    const updated = await Promise.all(
+      servers.map(async (server) => {
+        const start = Date.now();
+        try {
+          const res = await fetch(server.url, { signal: AbortSignal.timeout(8000) });
+          const time = Date.now() - start;
+          return { ...server, status: res.ok ? 'online' as const : 'offline' as const, responseTime: time };
+        } catch {
+          return { ...server, status: 'offline' as const, responseTime: Date.now() - start };
+        }
+      })
+    );
+    setServers(updated);
+  };
+
+  const handleAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passInput === SERVER_PASS) {
+      setIsAuthed(true);
+      setPassError(false);
+      sessionStorage.setItem('shm_auth', '1');
+      checkServers();
+    } else {
+      setPassError(true);
+    }
+  };
+
+  const handleOpen = () => {
+    setIsOpen(!isOpen);
+    if (!isOpen && isAuthed) checkServers();
+  };
+
+  const getStatusColor = (s: ServerStatus) => {
+    if (s.status === 'checking') return 'bg-yellow-500';
+    if (s.status === 'online') return s.responseTime < 1500 ? 'bg-emerald-500' : 'bg-amber-500';
+    return 'bg-red-500';
+  };
+
+  const getStatusText = (s: ServerStatus) => {
+    if (s.status === 'checking') return 'Đang kiểm tra...';
+    if (s.status === 'online') return `${s.responseTime}ms`;
+    return 'Không phản hồi';
+  };
+
+  const overallHealth = servers.every(s => s.status === 'online') ? 'emerald' : servers.some(s => s.status === 'online') ? 'amber' : 'red';
+
+  return (
+    <>
+      {/* Floating Button */}
+      <button
+        onClick={handleOpen}
+        className="fixed bottom-6 right-6 z-[200] w-12 h-12 bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:border-indigo-500/50 transition-all shadow-2xl shadow-black/50 group active:scale-90"
+        title="Server Health"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+        <span className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 ${isAuthed ? `bg-${overallHealth}-500` : 'bg-slate-600'} ${isAuthed && servers.some(s => s.status === 'checking') ? 'animate-pulse' : ''}`}></span>
+      </button>
+
+      {/* Panel */}
+      {isOpen && (
+        <div className="fixed bottom-20 right-6 z-[200] w-80 bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">Server Monitor</h3>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="text-slate-500 hover:text-white transition-colors">
+              <X size={16} />
+            </button>
+          </div>
+
+          {!isAuthed ? (
+            <form onSubmit={handleAuth} className="p-5 space-y-4">
+              <p className="text-slate-400 text-xs text-center">🔒 Nhập mật khẩu để xem trạng thái server</p>
+              <input
+                type="password"
+                value={passInput}
+                onChange={(e) => { setPassInput(e.target.value); setPassError(false); }}
+                placeholder="Mật khẩu..."
+                className={`w-full h-10 bg-slate-900 border ${passError ? 'border-red-500 ring-1 ring-red-500/30' : 'border-slate-800'} text-white text-sm rounded-xl px-4 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all placeholder:text-slate-600`}
+                autoFocus
+              />
+              {passError && <p className="text-red-400 text-[10px] font-bold text-center">Sai mật khẩu!</p>}
+              <button type="submit" className="w-full h-10 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95">
+                Xác nhận
+              </button>
+            </form>
+          ) : (
+            <div className="p-4 space-y-3">
+              {servers.map((server, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl">
+                  <div className="relative">
+                    <div className={`w-3 h-3 rounded-full ${getStatusColor(server)} ${server.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-bold truncate">{server.name}</p>
+                    <p className="text-slate-500 text-[10px] font-mono">{server.ping}</p>
+                  </div>
+                  <span className={`text-[11px] font-bold ${server.status === 'online' ? (server.responseTime < 1500 ? 'text-emerald-400' : 'text-amber-400') : server.status === 'offline' ? 'text-red-400' : 'text-yellow-400'}`}>
+                    {getStatusText(server)}
+                  </span>
+                </div>
+              ))}
+              <button
+                onClick={checkServers}
+                className="w-full h-9 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                Kiểm tra lại
+              </button>
+              <p className="text-slate-600 text-[9px] text-center">Tự động ping khi mở panel</p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+};
+
 export const Footer = () => (
   <footer className="bg-slate-950 pt-16 pb-12 border-t border-slate-900 relative z-10 overflow-hidden">
     {/* Background Glow */}
@@ -573,6 +715,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </main>
             <Footer />
             <ScrollToTop />
+            <ServerHealthMonitor />
         </div>
     );
 };
