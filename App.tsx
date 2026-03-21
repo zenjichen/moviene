@@ -9,6 +9,7 @@ import { SearchPage } from './pages/SearchPage';
 import { CategoryPage } from './pages/CategoryPage';
 import { FavoritesPage } from './pages/FavoritesPage';
 import { HistoryPage } from './pages/HistoryPage';
+import { FilterPage } from './pages/FilterPage';
 import { Clapperboard, Play } from 'lucide-react';
 import { api, getImageUrl } from './services/api';
 
@@ -263,6 +264,8 @@ function App() {
             <Route path="/xem-phim/:slug/:episodeSlug" element={<WatchPage />} />
             <Route path="/tim-kiem" element={<SearchPage />} />
             <Route path="/danh-sach/:type" element={<CategoryPage />} />
+            <Route path="/the-loai/:slug" element={<FilterPage />} />
+            <Route path="/quoc-gia/:slug" element={<FilterPage />} />
             <Route path="/yeu-thich" element={<FavoritesPage />} />
             <Route path="/lich-su" element={<HistoryPage />} />
           </Routes>
