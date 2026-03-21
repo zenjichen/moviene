@@ -127,22 +127,29 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
             );
         })}
 
-        <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/20 text-white hover:bg-indigo-600/80 backdrop-blur-md border border-white/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex active:scale-90">
-            <ChevronLeft size={32} />
+        {/* Mobile: prev/next arrows only */}
+        <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md border border-white/10 transition-all md:hidden active:scale-90">
+            <ChevronLeft size={22} />
         </button>
-        <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/20 text-white hover:bg-indigo-600/80 backdrop-blur-md border border-white/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex active:scale-90">
-            <ChevronRight size={32} />
+        <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md border border-white/10 transition-all md:hidden active:scale-90">
+            <ChevronRight size={22} />
         </button>
 
-        {/* Thumbnail navigation strip - bottom right */}
-        <div className="absolute bottom-16 right-6 z-20 hidden md:flex items-center gap-2">
+        {/* Desktop: thumbnail strip with integrated prev/next at bottom-right */}
+        <div className="absolute bottom-8 right-6 z-20 hidden md:flex items-center gap-2">
+            <button
+                onClick={prevSlide}
+                className="w-9 h-9 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
+            >
+                <ChevronLeft size={18} />
+            </button>
             {movies.map((movie, index) => (
                 <button
                     key={movie._id}
                     onClick={() => setCurrentIndex(index)}
                     className={`relative overflow-hidden rounded-lg transition-all duration-300 flex-shrink-0 ${
                         index === currentIndex
-                            ? 'w-20 h-14 ring-2 ring-indigo-400 ring-offset-1 ring-offset-black/50 scale-110'
+                            ? 'w-20 h-[52px] ring-2 ring-indigo-400 ring-offset-1 ring-offset-black/50 scale-105'
                             : 'w-16 h-11 opacity-50 hover:opacity-80 hover:scale-105'
                     }`}
                 >
@@ -157,6 +164,12 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     )}
                 </button>
             ))}
+            <button
+                onClick={nextSlide}
+                className="w-9 h-9 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
+            >
+                <ChevronRight size={18} />
+            </button>
         </div>
     </div>
   );
