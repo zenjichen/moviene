@@ -73,7 +73,7 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/55 to-transparent"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/20"></div>
                     
-                    <div className="absolute bottom-0 left-0 w-full h-full flex items-end pb-20 md:pb-28 px-4 md:px-12">
+                    <div className="absolute bottom-0 left-0 w-full h-full flex items-center px-4 md:px-12">
                         <div className="max-w-7xl mx-auto w-full">
                              <div className={`max-w-3xl transition-all duration-1000 delay-300 transform ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
                                 <div className="flex items-center gap-2 mb-6">

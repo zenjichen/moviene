@@ -158,7 +158,7 @@ export const Header = () => {
                <Link 
                 key={link.path} 
                 to={link.path} 
-                className={`h-9 px-3 lg:px-4 flex items-center justify-center gap-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
+                className={`h-9 px-3 lg:px-4 flex items-center justify-center gap-1.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
                   location.pathname === link.path 
                   ? 'bg-indigo-600 text-white shadow-lg' 
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -177,7 +177,7 @@ export const Header = () => {
           {/* Genre Dropdown Button */}
           <button
             onClick={() => setActiveDropdown(activeDropdown === 'genre' ? null : 'genre')}
-            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-xs font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
+            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-[13px] font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
               activeDropdown === 'genre'
               ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
               : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
@@ -191,7 +191,7 @@ export const Header = () => {
           {/* Country Dropdown Button */}
           <button
             onClick={() => setActiveDropdown(activeDropdown === 'country' ? null : 'country')}
-            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-xs font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
+            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-[13px] font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
               activeDropdown === 'country'
               ? 'bg-purple-600 border-purple-500 text-white shadow-lg'
               : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
