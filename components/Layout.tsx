@@ -711,7 +711,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     return (
         <div className="min-h-screen flex flex-col bg-slate-950 font-sans">
             <Header />
-            <main className={`flex-1 w-full ${isHomePage ? '' : 'pt-20 md:pt-24 px-4 max-w-7xl mx-auto'}`}>
+            <main className={`flex-1 w-full ${isHomePage ? '' : 'pt-20 md:pt-24 px-4 md:px-[3cm] mx-auto'}`}>
                 {children}
             </main>
             <Footer />
