@@ -266,7 +266,7 @@ const ChildhoodPolaroidCard: React.FC<{ movie: Movie, index: number }> = ({ movi
 
 const SpotlightMovieCard: React.FC<{ movie: Movie }> = ({ movie }) => (
     <Link to={`/phim/${movie.slug}`} className="group relative block aspect-video overflow-hidden rounded-2xl bg-slate-900 shadow-2xl transition-all duration-500 hover:scale-[1.02]">
-        <img src={getImageUrl(movie.poster_url)} alt={movie.name} className="absolute inset-0 w-full h-full object-cover" decoding="async" />
+        <img src={getImageUrl(movie.thumb_url || movie.poster_url)} alt={movie.name} className="absolute inset-0 w-full h-full object-cover" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
         <div className="absolute bottom-0 left-0 p-6 w-full">
             <div className="flex items-center gap-2 mb-2">
