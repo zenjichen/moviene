@@ -590,7 +590,7 @@ export const Footer = () => (
     <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-full h-64 bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
     
     <div className="max-w-7xl mx-auto px-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12 lg:gap-16 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-16">
         {/* Column 1: Brand */}
         <div className="space-y-6">
           <Link to="/" className="flex items-center gap-3 group">
@@ -612,46 +612,20 @@ export const Footer = () => (
           </div>
         </div>
 
-        {/* Column 2: Navigation Hub (Combined Explore & Categories) */}
-        <div className="space-y-8">
-          <div className="grid grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <h4 className="text-white font-black text-sm uppercase tracking-widest border-l-2 border-indigo-500 pl-3">Khám Phá</h4>
-              <ul className="space-y-3">
-                {[
-                  { name: 'Phim Mới', path: '/danh-sach/phim-moi' },
-                  { name: 'Phim Lẻ', path: '/danh-sach/phim-le' },
-                  { name: 'Phim Bộ', path: '/danh-sach/phim-bo' },
-                  { name: 'Hoạt Hình', path: '/danh-sach/hoat-hinh' }
-                ].map(link => (
-                  <li key={link.name}>
-                    <Link to={link.path} className="text-slate-500 hover:text-indigo-400 text-sm transition-colors flex items-center gap-2 group">
-                      <div className="w-1 h-1 bg-slate-700 rounded-full group-hover:bg-indigo-500 transition-colors"></div>
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-white font-black text-sm uppercase tracking-widest border-l-2 border-indigo-500 pl-3">Danh Mục</h4>
-              <ul className="space-y-3">
-                {[
-                  { name: 'TV Shows', path: '/danh-sach/tv-shows' },
-                  { name: 'Hành Động', path: '/danh-sach/phim-le?genre=hanh-dong' },
-                  { name: 'Cổ Trang', path: '/danh-sach/phim-bo?genre=co-trang' },
-                  { name: 'Yêu Thích', path: '/yeu-thich' }
-                ].map(link => (
-                  <li key={link.name}>
-                    <Link to={link.path} className="text-slate-500 hover:text-indigo-400 text-sm transition-colors flex items-center gap-2 group">
-                      <div className="w-1 h-1 bg-slate-700 rounded-full group-hover:bg-indigo-500 transition-colors"></div>
-                      {link.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+        {/* Column 2: QR Donate */}
+        <div className="flex flex-col items-center md:items-end gap-4">
+          <h4 className="text-white font-black text-sm uppercase tracking-widest border-l-2 border-indigo-500 pl-3">Ủng Hộ Duy Trì Web</h4>
+          <div className="bg-white rounded-2xl p-2 shadow-xl shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-shadow">
+            <img 
+              src="https://img.vietqr.io/image/MB-99660999999999-print.png?accountName=NGUYEN%20MANH%20HA" 
+              alt="QR Donate - MB Bank - NGUYEN MANH HA" 
+              className="w-48 h-auto rounded-xl"
+              loading="lazy"
+            />
           </div>
+          <p className="text-slate-500 text-xs leading-relaxed max-w-sm text-center md:text-right italic">
+            "Mọi sự nỗ lực xây web này đều là miễn phí, một chút tấm lòng cũng sẽ không làm mình giàu thêm, nhưng sẽ duy trì được web được lâu ^^"
+          </p>
         </div>
       </div>
 
@@ -659,9 +633,6 @@ export const Footer = () => (
         <div className="flex flex-col gap-2">
             <p className="text-xs text-slate-600 font-bold uppercase tracking-[0.2em]">
               &copy; {new Date().getFullYear()} <span className="text-slate-500">HÀ MOVIE HOUSE</span>. All rights reserved.
-            </p>
-            <p className="text-[11px] text-slate-500 font-medium tracking-wide">
-              Liên hệ: <a href="https://www.facebook.com/NguyenManhHaOfficial" target="_blank" rel="noopener noreferrer" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">facebook.com/NguyenManhHaOfficial</a>
             </p>
         </div>
         <div className="flex items-center gap-6">
