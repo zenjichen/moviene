@@ -72,7 +72,7 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/55 to-transparent"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/20"></div>
                     
-                    <div className="absolute bottom-0 left-0 w-full h-full flex items-end pb-24 md:pb-32 px-4 md:px-12">
+                    <div className="absolute bottom-0 left-0 w-full h-full flex items-end pb-20 md:pb-28 px-4 md:px-12">
                         <div className="max-w-7xl mx-auto w-full">
                              <div className={`max-w-3xl transition-all duration-1000 delay-300 transform ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
                                 <div className="flex items-center gap-2 mb-6">
@@ -127,15 +127,15 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
             );
         })}
 
-        <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-14 h-14 flex items-center justify-center rounded-full bg-black/20 text-white hover:bg-indigo-600/80 backdrop-blur-md border border-white/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex active:scale-90">
+        <button onClick={prevSlide} className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/20 text-white hover:bg-indigo-600/80 backdrop-blur-md border border-white/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex active:scale-90">
             <ChevronLeft size={32} />
         </button>
-        <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-14 h-14 flex items-center justify-center rounded-full bg-black/20 text-white hover:bg-indigo-600/80 backdrop-blur-md border border-white/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex active:scale-90">
+        <button onClick={nextSlide} className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 flex items-center justify-center rounded-full bg-black/20 text-white hover:bg-indigo-600/80 backdrop-blur-md border border-white/10 transition-all opacity-0 group-hover:opacity-100 hidden md:flex active:scale-90">
             <ChevronRight size={32} />
         </button>
 
         {/* Thumbnail navigation strip - bottom right */}
-        <div className="absolute bottom-6 right-6 z-20 hidden md:flex items-center gap-2">
+        <div className="absolute bottom-16 right-6 z-20 hidden md:flex items-center gap-2">
             {movies.map((movie, index) => (
                 <button
                     key={movie._id}
