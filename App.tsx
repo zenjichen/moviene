@@ -264,32 +264,44 @@ function App() {
     const fullTitle = 'Hà Movie House - Xem Phim Online Miễn Phí 🎬';
     let i = 0;
     let isDeleting = false;
+    let showCursor = true;
     let timer: ReturnType<typeof setTimeout>;
 
+    // Blinking cursor toggle
+    const cursorInterval = setInterval(() => {
+      showCursor = !showCursor;
+      const text = fullTitle.slice(0, i);
+      document.title = text + (showCursor ? '|' : ' ');
+    }, 500);
+
     const tick = () => {
+      const cursor = showCursor ? '|' : ' ';
       if (!isDeleting) {
-        document.title = fullTitle.slice(0, i + 1);
         i++;
+        document.title = fullTitle.slice(0, i) + cursor;
         if (i >= fullTitle.length) {
           isDeleting = true;
-          timer = setTimeout(tick, 2000); // pause before deleting
+          timer = setTimeout(tick, 2500);
           return;
         }
-        timer = setTimeout(tick, 100); // typing speed
+        timer = setTimeout(tick, 150); // slower typing
       } else {
-        document.title = fullTitle.slice(0, i);
         i--;
+        document.title = fullTitle.slice(0, i) + cursor;
         if (i <= 0) {
           isDeleting = false;
-          timer = setTimeout(tick, 500); // pause before retyping
+          timer = setTimeout(tick, 800);
           return;
         }
-        timer = setTimeout(tick, 50); // deleting speed (faster)
+        timer = setTimeout(tick, 30); // fast deleting
       }
     };
 
     timer = setTimeout(tick, 1000);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearInterval(cursorInterval);
+    };
   }, []);
 
   const handleEnter = () => {
