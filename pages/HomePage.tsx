@@ -56,8 +56,8 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     <div
                         className="absolute inset-0 hidden sm:block"
                         style={{
-                            maskImage: 'linear-gradient(to left, black 45%, transparent 82%)',
-                            WebkitMaskImage: 'linear-gradient(to left, black 45%, transparent 82%)',
+                            maskImage: 'linear-gradient(to left, black 35%, transparent 75%)',
+                            WebkitMaskImage: 'linear-gradient(to left, black 35%, transparent 75%)',
                         }}
                     >
                         <img
@@ -68,6 +68,11 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                             decoding="async"
                         />
                     </div>
+                    {/* Poster edge blur overlay */}
+                    <div className="absolute inset-0 hidden sm:block pointer-events-none" style={{
+                        background: 'linear-gradient(to right, transparent 30%, rgba(15,23,42,0.15) 50%, transparent 70%)',
+                        backdropFilter: 'blur(0px)',
+                    }}></div>
 
                     {/* Layer 3: Gradient overlays for text readability */}
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/55 to-transparent"></div>
@@ -148,10 +153,10 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                 <button
                     key={movie._id}
                     onClick={() => setCurrentIndex(index)}
-                    className={`relative overflow-hidden rounded-lg transition-all duration-300 flex-shrink-0 ${
+                    className={`relative overflow-hidden rounded-xl transition-all duration-300 flex-shrink-0 ${
                         index === currentIndex
-                            ? 'w-20 h-[52px] ring-2 ring-indigo-400 ring-offset-1 ring-offset-black/50 scale-105'
-                            : 'w-16 h-11 opacity-50 hover:opacity-80 hover:scale-105'
+                            ? 'w-24 h-16 ring-2 ring-indigo-400 ring-offset-1 ring-offset-black/50 scale-105'
+                            : 'w-20 h-14 opacity-50 hover:opacity-80 hover:scale-105'
                     }`}
                 >
                     <img
