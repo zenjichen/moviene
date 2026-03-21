@@ -248,6 +248,7 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2 relative" ref={searchRef}>
+            <ServerHealthMonitor />
             <form onSubmit={handleSearch} className="hidden md:flex items-center relative group mb-0">
                 <input 
                     type="text" 
@@ -511,20 +512,20 @@ export const ServerHealthMonitor = () => {
   const overallHealth = servers.every(s => s.status === 'online') ? 'emerald' : servers.some(s => s.status === 'online') ? 'amber' : 'red';
 
   return (
-    <>
-      {/* Floating Button */}
+    <div className="relative">
+      {/* Inline Button */}
       <button
         onClick={handleOpen}
-        className="fixed bottom-20 right-6 z-[200] w-12 h-12 bg-slate-900/90 backdrop-blur-xl border border-slate-700/50 rounded-2xl flex items-center justify-center text-slate-400 hover:text-white hover:border-indigo-500/50 transition-all shadow-2xl shadow-black/50 group active:scale-90"
+        className="w-9 h-9 bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:border-indigo-500/50 transition-all group active:scale-90 relative"
         title="Server Health"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
-        <span className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-900 ${isAuthed ? `bg-${overallHealth}-500` : 'bg-slate-600'} ${isAuthed && servers.some(s => s.status === 'checking') ? 'animate-pulse' : ''}`}></span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+        <span className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${isAuthed ? (overallHealth === 'emerald' ? 'bg-emerald-500' : overallHealth === 'amber' ? 'bg-amber-500' : 'bg-red-500') : 'bg-slate-600'} ${isAuthed && servers.some(s => s.status === 'checking') ? 'animate-pulse' : ''}`}></span>
       </button>
 
       {/* Panel */}
       {isOpen && (
-        <div className="fixed bottom-[136px] right-6 z-[200] w-80 bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="absolute top-full mt-3 right-0 z-[200] w-80 bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
@@ -579,7 +580,7 @@ export const ServerHealthMonitor = () => {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 };
 
@@ -715,7 +716,6 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             </main>
             <Footer />
             <ScrollToTop />
-            <ServerHealthMonitor />
         </div>
     );
 };
