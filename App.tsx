@@ -179,11 +179,11 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
           <button
             onClick={handleStart}
             disabled={isTransitioning || isAccelerating || showWhiteFade}
-            className={`group relative inline-flex items-center gap-4 px-10 py-5 md:px-12 md:py-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-black text-xl md:text-2xl shadow-[0_10px_40px_rgba(99,102,241,0.4)] hover:shadow-indigo-600/60 hover:scale-105 active:scale-95 transition-all duration-700 overflow-hidden ${isAccelerating ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}`}
+            className={`group relative inline-flex items-center gap-4 px-10 py-5 md:px-12 md:py-6 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-900 rounded-full font-black text-xl md:text-2xl shadow-[0_10px_40px_rgba(245,158,11,0.5)] hover:shadow-amber-500/60 hover:scale-105 active:scale-95 transition-all duration-700 overflow-hidden ${isAccelerating ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'}`}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-            <Play size={24} className="fill-white relative z-10 md:hidden" />
-            <Play size={28} className="fill-white relative z-10 hidden md:block" />
+            <Play size={24} className="fill-slate-900 relative z-10 md:hidden" />
+            <Play size={28} className="fill-slate-900 relative z-10 hidden md:block" />
             <span className="relative z-10">XEM NGAY</span>
             <div className="absolute inset-0 rounded-full bg-white blur-md opacity-0 group-hover:opacity-20 transition-opacity"></div>
           </button>

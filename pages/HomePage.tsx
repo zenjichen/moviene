@@ -113,9 +113,9 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                                 <div className="flex items-center gap-3 md:gap-4">
                                     <Link 
                                         to={`/phim/${movie.slug}`} 
-                                        className="px-6 py-3.5 md:px-10 md:py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full font-black flex items-center justify-center gap-2.5 hover:shadow-indigo-600/50 transition-all shadow-xl shadow-indigo-600/30 hover:scale-105 active:scale-95 group/btn"
+                                        className="px-6 py-3.5 md:px-10 md:py-4 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-900 rounded-full font-black flex items-center justify-center gap-2.5 hover:shadow-amber-500/50 transition-all shadow-xl shadow-amber-500/30 hover:scale-105 active:scale-95 group/btn"
                                     >
-                                        <Play size={20} className="md:size-6 fill-white group-hover/btn:scale-110 transition-transform" /> 
+                                        <Play size={20} className="md:size-6 fill-slate-900 group-hover/btn:scale-110 transition-transform" /> 
                                         <span className="text-sm md:text-base">XEM NGAY</span>
                                     </Link>
                                     <Link 
