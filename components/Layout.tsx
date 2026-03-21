@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Heart, Clock, Film, Tv, Star, Clapperboard, User, Phone, Play, Filter, Loader2, Zap, Library, ChevronRight, Sparkles, LayoutGrid, ChevronUp, Mail, Send, ShieldCheck, FileText, Info as InfoIcon } from 'lucide-react';
+import { Search, Menu, X, Heart, Clock, Film, Tv, Star, Clapperboard, User, Phone, Play, Filter, Loader2, Zap, Library, ChevronRight, Sparkles, LayoutGrid, ChevronUp, Mail, Send, ShieldCheck, FileText, Info as InfoIcon, ChevronDown, Globe, Tag } from 'lucide-react';
 import { api, getImageUrl } from '../services/api';
 import { Movie } from '../types';
 import { storage } from '../utils/storage';
@@ -17,10 +17,16 @@ export const Header = () => {
   // Badge counts
   const [favCount, setFavCount] = useState(0);
   const [histCount, setHistCount] = useState(0);
+
+  // Dropdown data
+  const [genres, setGenres] = useState<any[]>([]);
+  const [countries, setCountries] = useState<any[]>([]);
+  const [activeDropdown, setActiveDropdown] = useState<'genre' | 'country' | null>(null);
   
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<any>(null);
 
   useEffect(() => {
@@ -31,6 +37,9 @@ export const Header = () => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
       }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setActiveDropdown(null);
+      }
     };
     window.addEventListener('mousedown', handleClickOutside);
     
@@ -40,9 +49,20 @@ export const Header = () => {
     };
   }, []);
 
+  // Fetch genres and countries for dropdown
+  useEffect(() => {
+    api.getFilters('the-loai').then(res => {
+      setGenres(Array.isArray(res) ? res : (res.data?.items || res.items || []));
+    }).catch(() => {});
+    api.getFilters('quoc-gia').then(res => {
+      setCountries(Array.isArray(res) ? res : (res.data?.items || res.items || []));
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setShowSuggestions(false);
+    setActiveDropdown(null);
     
     // Update badge counts on location change
     setFavCount(storage.getFavorites().length);
@@ -91,6 +111,7 @@ export const Header = () => {
   const closeSearchMenus = () => {
     setShowSuggestions(false);
     setIsMobileMenuOpen(false);
+    setActiveDropdown(null);
     setSearchQuery('');
   };
 
@@ -131,7 +152,8 @@ export const Header = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1 bg-slate-900/40 p-1 rounded-full border border-white/5 backdrop-blur-md">
+        <div className="hidden md:flex items-center gap-2" ref={dropdownRef}>
+          <nav className="flex items-center gap-1 bg-slate-900/40 p-1 rounded-full border border-white/5 backdrop-blur-md">
             {[...navLinks, ...personalLinks].map((link) => (
                <Link 
                 key={link.path} 
@@ -150,7 +172,80 @@ export const Header = () => {
                  )}
                </Link>
             ))}
-        </nav>
+          </nav>
+
+          {/* Genre Dropdown Button */}
+          <button
+            onClick={() => setActiveDropdown(activeDropdown === 'genre' ? null : 'genre')}
+            className={`h-10 px-3 lg:px-4 flex items-center gap-1.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md ${
+              activeDropdown === 'genre'
+              ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
+              : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Tag size={14} />
+            <span className="hidden lg:inline">Thể Loại</span>
+            <ChevronDown size={12} className={`transition-transform ${activeDropdown === 'genre' ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Country Dropdown Button */}
+          <button
+            onClick={() => setActiveDropdown(activeDropdown === 'country' ? null : 'country')}
+            className={`h-10 px-3 lg:px-4 flex items-center gap-1.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md ${
+              activeDropdown === 'country'
+              ? 'bg-purple-600 border-purple-500 text-white shadow-lg'
+              : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Globe size={14} />
+            <span className="hidden lg:inline">Quốc Gia</span>
+            <ChevronDown size={12} className={`transition-transform ${activeDropdown === 'country' ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Genre Dropdown Panel */}
+          {activeDropdown === 'genre' && genres.length > 0 && (
+            <div className="absolute top-full mt-3 left-0 right-0 mx-auto max-w-3xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 animate-in fade-in slide-in-from-top-2 duration-200 z-[110]">
+              <div className="flex items-center gap-2 mb-4">
+                <Tag size={16} className="text-indigo-400" />
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">Thể loại phim</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {genres.map(g => (
+                  <Link
+                    key={g.slug}
+                    to={`/the-loai/${g.slug}`}
+                    onClick={() => setActiveDropdown(null)}
+                    className="px-3 py-1.5 bg-slate-800/80 hover:bg-indigo-600 text-slate-300 hover:text-white text-xs font-bold rounded-lg transition-all border border-slate-700/50 hover:border-indigo-500"
+                  >
+                    {g.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Country Dropdown Panel */}
+          {activeDropdown === 'country' && countries.length > 0 && (
+            <div className="absolute top-full mt-3 left-0 right-0 mx-auto max-w-3xl bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.6)] p-6 animate-in fade-in slide-in-from-top-2 duration-200 z-[110]">
+              <div className="flex items-center gap-2 mb-4">
+                <Globe size={16} className="text-purple-400" />
+                <h3 className="text-sm font-black text-white uppercase tracking-wider">Quốc gia</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {countries.map(c => (
+                  <Link
+                    key={c.slug}
+                    to={`/quoc-gia/${c.slug}`}
+                    onClick={() => setActiveDropdown(null)}
+                    className="px-3 py-1.5 bg-slate-800/80 hover:bg-purple-600 text-slate-300 hover:text-white text-xs font-bold rounded-lg transition-all border border-slate-700/50 hover:border-purple-500"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-2 relative" ref={searchRef}>
             <form onSubmit={handleSearch} className="hidden md:flex items-center relative group mb-0">
@@ -276,6 +371,34 @@ export const Header = () => {
                           ))}
                       </div>
                   </div>
+
+                  {/* Genre Section - Mobile */}
+                  {genres.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2"><Tag size={12} className="text-indigo-400" /> Thể loại phim</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {genres.map(g => (
+                          <Link key={g.slug} to={`/the-loai/${g.slug}`} className="px-3 py-2 bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 text-xs font-bold rounded-xl transition-all">
+                            {g.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Country Section - Mobile */}
+                  {countries.length > 0 && (
+                    <div className="space-y-4">
+                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2"><Globe size={12} className="text-purple-400" /> Quốc gia</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {countries.slice(0, 20).map(c => (
+                          <Link key={c.slug} to={`/quoc-gia/${c.slug}`} className="px-3 py-2 bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-purple-600 hover:text-white hover:border-purple-500 text-xs font-bold rounded-xl transition-all">
+                            {c.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Personal Section */}
                   <div className="space-y-4">

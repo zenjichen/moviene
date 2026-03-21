@@ -1,9 +1,10 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { api, getImageUrl } from '../services/api';
-import { Movie } from '../types';
+import { Movie, WatchHistoryItem } from '../types';
+import { storage } from '../utils/storage';
 import { MovieCard, SectionTitle, Loader, MovieCardSkeleton } from '../components/UI';
-import { Play, Info, ChevronRight, ChevronLeft, ArrowRight, Sparkles, MonitorPlay, Ghost, Zap, Heart, Flame, Clapperboard, Camera, Radio, Tv, AlertCircle, Star, Calendar, Layers } from 'lucide-react';
+import { Play, Info, ChevronRight, ChevronLeft, ArrowRight, Sparkles, MonitorPlay, Ghost, Zap, Heart, Flame, Clapperboard, Camera, Radio, Tv, AlertCircle, Star, Calendar, Layers, Clock } from 'lucide-react';
 import { Link, useNavigationType } from 'react-router-dom';
 
 // Persistent variable to store scroll position across navigations
@@ -605,6 +606,49 @@ export const HomePage = () => {
                 </div>
             </div>
           </section>
+
+          {/* LỊCH SỬ XEM PHIM */}
+          {(() => {
+            const h = storage.getHistory();
+            const historyItems = Object.values(h).sort((a, b) => b.lastUpdated - a.lastUpdated).slice(0, 10);
+            if (historyItems.length === 0) return null;
+            return (
+              <section className="mb-24 content-auto">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-amber-500/20">
+                      <Clock size={24} />
+                    </div>
+                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter">Xem Gần Đây</h2>
+                  </div>
+                  <Link to="/lich-su" className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-xl transition-all active:scale-90 shadow-lg bg-transparent border-2 border-amber-500 text-amber-400 hover:bg-amber-500 hover:text-white">
+                    <ArrowRight size={20} />
+                  </Link>
+                </div>
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory -mx-1 px-1">
+                  {historyItems.map(item => (
+                    <Link key={item.slug} to={`/xem-phim/${item.slug}/${item.episodeSlug}${item.serverIndex !== undefined ? `?sv=${item.serverIndex}` : ''}`} className="group flex-shrink-0 w-36 sm:w-44 snap-start">
+                      <div className="relative aspect-[2/3] rounded-2xl overflow-hidden border border-white/10 shadow-xl mb-3">
+                        <img src={getImageUrl(item.poster_url)} alt={item.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" decoding="async" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-3">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-500/90 text-white text-[9px] font-black uppercase rounded-md">
+                            <Play size={8} fill="currentColor" /> {item.episodeName}
+                          </span>
+                        </div>
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30">
+                            <Play size={20} fill="white" className="text-white ml-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                      <h4 className="text-white font-bold text-xs line-clamp-2 group-hover:text-amber-400 transition-colors leading-tight">{item.name}</h4>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
 
           {/* 2. PHIM CHIẾU RẠP - BALANCED 3 COLUMN (Synced to 6 items) */}
           <section className="mb-24 content-auto">
