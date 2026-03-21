@@ -8,6 +8,21 @@ const OPHIM_BASE_URL = 'https://ophim1.com';
 const IMG_PREFIX = 'https://phimimg.com/';
 const NGUONC_IMG_PREFIX = 'https://phim.nguonc.com/';
 const OPHIM_IMG_PREFIX = 'https://img.ophim1.com/uploads/movies/';
+const OPHIM_CDN_IMG = 'https://img.ophim.live/uploads/movies/';
+
+// Normalize OPhim items: add full image URL prefix for relative paths
+const normalizeOPhimItems = (items: any[]): any[] => {
+  return items.map(item => {
+    const m = { ...item };
+    if (m.thumb_url && !m.thumb_url.startsWith('http')) {
+      m.thumb_url = `${OPHIM_CDN_IMG}${m.thumb_url}`;
+    }
+    if (m.poster_url && !m.poster_url.startsWith('http')) {
+      m.poster_url = `${OPHIM_CDN_IMG}${m.poster_url}`;
+    }
+    return m;
+  });
+};
 
 export const getImageUrl = (url: string) => {
   if (!url) return '';
@@ -27,46 +42,109 @@ export const getImageUrl = (url: string) => {
 };
 
 export const api = {
+  // === PRIMARY: OPhim | FALLBACK: PhimAPI ===
+
   getNewUpdates: async (page = 1): Promise<ApiResponseList<any>> => {
     try {
-      const res = await fetch(`${BASE_URL}/danh-sach/phim-moi-cap-nhat-v3?page=${page}`);
-      return await res.json();
+      const res = await fetch(`${OPHIM_BASE_URL}/v1/api/danh-sach/phim-moi-cap-nhat?page=${page}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.data?.items) {
+        const items = normalizeOPhimItems(json.data.items);
+        return { status: true, items, pathImage: '', pagination: json.data.params?.pagination || {} } as any;
+      }
+      throw new Error('OPhim failed');
     } catch (error) {
-      const fallback = await fetch(`${BASE_URL}/danh-sach/phim-moi-cap-nhat?page=${page}`);
-      return await fallback.json();
+      try {
+        const fallback = await fetch(`${BASE_URL}/danh-sach/phim-moi-cap-nhat-v3?page=${page}`);
+        return await fallback.json();
+      } catch {
+        const fallback2 = await fetch(`${BASE_URL}/danh-sach/phim-moi-cap-nhat?page=${page}`);
+        return await fallback2.json();
+      }
     }
   },
 
   getMoviesByType: async (type: string, limit = 18, page = 1, category = '', country = '', year = '', lang = '') => {
-    const params: Record<string, string> = {
+    try {
+      const params: Record<string, string> = {
         page: page.toString(),
         limit: limit.toString(),
         sort_field: 'modified.time',
         sort_type: 'desc'
-    };
-    if (category) params.category = category;
-    if (country) params.country = country;
-    if (year) params.year = year;
-    if (lang) params.sort_lang = lang;
+      };
+      if (category) params.category = category;
+      if (country) params.country = country;
+      if (year) params.year = year;
+      if (lang) params.sort_lang = lang;
 
-    const query = new URLSearchParams(params);
-    const res = await fetch(`${BASE_URL}/v1/api/danh-sach/${type}?${query.toString()}`);
-    return res.json();
+      const query = new URLSearchParams(params);
+      const res = await fetch(`${OPHIM_BASE_URL}/v1/api/danh-sach/${type}?${query.toString()}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.data?.items) {
+        json.data.items = normalizeOPhimItems(json.data.items);
+        return json;
+      }
+      throw new Error('OPhim failed');
+    } catch {
+      // Fallback to PhimAPI
+      const params: Record<string, string> = {
+        page: page.toString(),
+        limit: limit.toString(),
+        sort_field: 'modified.time',
+        sort_type: 'desc'
+      };
+      if (category) params.category = category;
+      if (country) params.country = country;
+      if (year) params.year = year;
+      if (lang) params.sort_lang = lang;
+
+      const query = new URLSearchParams(params);
+      const res = await fetch(`${BASE_URL}/v1/api/danh-sach/${type}?${query.toString()}`);
+      return res.json();
+    }
   },
 
   getFilters: async (filterType: 'the-loai' | 'quoc-gia') => {
-    const res = await fetch(`${BASE_URL}/${filterType}`);
-    return res.json();
+    try {
+      const res = await fetch(`${OPHIM_BASE_URL}/v1/api/${filterType}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.data?.items) {
+        return json.data.items; // Return array directly: [{_id, name, slug}, ...]
+      }
+      throw new Error('OPhim filters failed');
+    } catch {
+      const res = await fetch(`${BASE_URL}/${filterType}`);
+      return res.json();
+    }
   },
 
   getFiltersItems: async (filterType: 'the-loai' | 'quoc-gia') => {
-    const res = await fetch(`${BASE_URL}/${filterType}`);
-    return res.json();
+    try {
+      const res = await fetch(`${OPHIM_BASE_URL}/v1/api/${filterType}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.data?.items) {
+        return json.data.items;
+      }
+      throw new Error('OPhim filters failed');
+    } catch {
+      const res = await fetch(`${BASE_URL}/${filterType}`);
+      return res.json();
+    }
   },
 
   getMoviesByFilter: async (filterType: 'the-loai' | 'quoc-gia', slug: string, page = 1, limit = 18) => {
-    const res = await fetch(`${BASE_URL}/v1/api/${filterType}/${slug}?page=${page}&limit=${limit}`);
-    return res.json();
+    try {
+      const res = await fetch(`${OPHIM_BASE_URL}/v1/api/${filterType}/${slug}?page=${page}&limit=${limit}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.data?.items) {
+        json.data.items = normalizeOPhimItems(json.data.items);
+        return json;
+      }
+      throw new Error('OPhim filter failed');
+    } catch {
+      const res = await fetch(`${BASE_URL}/v1/api/${filterType}/${slug}?page=${page}&limit=${limit}`);
+      return res.json();
+    }
   },
 
   getMovieDetailMain: async (slug: string) => {

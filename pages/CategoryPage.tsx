@@ -58,8 +58,8 @@ export const CategoryPage = () => {
                 api.getFilters('the-loai'),
                 api.getFilters('quoc-gia')
             ]);
-            setGenres(Array.isArray(genresRes) ? genresRes : (genresRes.items || []));
-            setCountries(Array.isArray(countriesRes) ? countriesRes : (countriesRes.items || []));
+            setGenres(Array.isArray(genresRes) ? genresRes : (genresRes.data?.items || genresRes.items || []));
+            setCountries(Array.isArray(countriesRes) ? countriesRes : (countriesRes.data?.items || countriesRes.items || []));
         } catch (err) {
             console.error("Error loading filters:", err);
         }
@@ -92,7 +92,10 @@ export const CategoryPage = () => {
             setTitle(baseTitle);
             setMovies(res.data?.items || res.items || []);
             const pagination = res.data?.params?.pagination || res.pagination;
-            if (pagination) setTotalPages(pagination.totalPages || 1);
+            if (pagination) {
+              const tp = pagination.totalPages || (pagination.totalItems && pagination.totalItemsPerPage ? Math.ceil(pagination.totalItems / pagination.totalItemsPerPage) : 1);
+              setTotalPages(tp);
+            }
         } catch (err) {
             console.error("Fetch movies error:", err);
             setMovies([]);
