@@ -39,7 +39,7 @@ export const WatchPage = () => {
         if (result.status && result.movie) {
           setMovie(result.movie);
           setServerList(result.episodes);
-          document.title = `Xem phim ${result.movie.name} - Tập ${episodeSlug} - Phat Movie`;
+          document.title = `Xem phim ${result.movie.name} - Tập ${episodeSlug} - Hà Movie House`;
 
           const svParam = searchParams.get('sv');
           if (svParam !== null) {
@@ -64,7 +64,7 @@ export const WatchPage = () => {
     };
     loadData();
 
-    return () => { document.title = 'Phat Movie - Xem Phim Online'; };
+    return () => { document.title = 'Hà Movie House - Xem Phim Online'; };
   }, [slug, episodeSlug, searchParams]);
 
   useEffect(() => {

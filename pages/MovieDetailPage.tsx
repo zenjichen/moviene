@@ -46,7 +46,7 @@ export const MovieDetailPage = () => {
               setActiveServerIndex(0);
           }
           
-          document.title = `${result.movie.name} (${result.movie.year}) - Phat Movie`;
+          document.title = `${result.movie.name} (${result.movie.year}) - Hà Movie House`;
 
           if (result.movie.category && result.movie.category.length > 0) {
               // Fetch 25 items to buffer for filtering, then slice to 24 (LCM of 2,3,4,6)
@@ -65,7 +65,7 @@ export const MovieDetailPage = () => {
 
     loadData();
 
-    return () => { document.title = 'Phat Movie - Xem Phim Online'; };
+    return () => { document.title = 'Hà Movie House - Xem Phim Online'; };
   }, [slug]);
 
   const cleanServerName = (name: string) => {

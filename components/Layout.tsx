@@ -126,7 +126,7 @@ export const Header = () => {
             <Clapperboard size={24} className="text-white" />
           </div>
           <span className="font-black italic tracking-[-0.075em] text-2xl uppercase text-white">
-              PHAT<span className="text-indigo-500 drop-shadow-[0_0_10px_rgba(99,102,241,0.6)]">MOVIE</span>
+              HÀ<span className="text-indigo-500 drop-shadow-[0_0_10px_rgba(99,102,241,0.6)]">MOVIE</span><span className="text-slate-300 text-lg ml-1">HOUSE</span>
           </span>
         </Link>
 
@@ -332,18 +332,16 @@ export const Footer = () => (
               <Clapperboard size={24} className="text-white" />
             </div>
             <span className="text-2xl font-black italic tracking-[-0.075em] uppercase text-white">
-              PHAT<span className="text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">MOVIE</span>
+              HÀ<span className="text-indigo-500 drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">MOVIE</span><span className="text-slate-300 text-lg ml-1">HOUSE</span>
             </span>
           </Link>
           <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
             Nền tảng xem phim trực tuyến hàng đầu Việt Nam. Chất lượng cao, trải nghiệm mượt mà, nội dung cập nhật liên tục 24/7.
           </p>
           <div className="flex items-center gap-4">
-            <a href="https://t.me/nguyenphat" className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:border-indigo-500/50 transition-all hover:-translate-y-1">
-              <Send size={18} />
-            </a>
-            <a href="mailto:contact@phatmovie.com" className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:border-indigo-500/50 transition-all hover:-translate-y-1">
-              <Mail size={18} />
+            <a href="https://www.facebook.com/NguyenManhHaOfficial" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-all hover:-translate-y-1 text-sm font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              Facebook
             </a>
           </div>
         </div>
@@ -394,10 +392,10 @@ export const Footer = () => (
       <div className="pt-8 border-t border-slate-900/50 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
         <div className="flex flex-col gap-2">
             <p className="text-xs text-slate-600 font-bold uppercase tracking-[0.2em]">
-              &copy; {new Date().getFullYear()} <span className="text-slate-500">PHAT MOVIE</span>. All rights reserved.
+              &copy; {new Date().getFullYear()} <span className="text-slate-500">HÀ MOVIE HOUSE</span>. All rights reserved.
             </p>
             <p className="text-[11px] text-slate-500 font-medium tracking-wide">
-              Tác giả: <span className="text-indigo-400 font-bold">Nguyễn Phát</span> - Hotline: <span className="text-indigo-400 font-bold">03 8686 5151</span>
+              Liên hệ: <a href="https://www.facebook.com/NguyenManhHaOfficial" target="_blank" rel="noopener noreferrer" className="text-indigo-400 font-bold hover:text-indigo-300 transition-colors">facebook.com/NguyenManhHaOfficial</a>
             </p>
         </div>
         <div className="flex items-center gap-6">
