@@ -141,7 +141,7 @@ export const Header = () => {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${headerBgClass}`}>
-      <div className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-2">
         <Link to="/" className="flex items-center gap-3 group z-50" onClick={closeSearchMenus}>
           <div className="p-1.5 bg-indigo-600 rounded-lg group-hover:rotate-6 transition-transform">
             <Clapperboard size={24} className="text-white" />
@@ -152,13 +152,13 @@ export const Header = () => {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-2" ref={dropdownRef}>
-          <nav className="flex items-center gap-1 bg-slate-900/40 p-1 rounded-full border border-white/5 backdrop-blur-md">
+        <div className="hidden md:flex items-center gap-1.5 flex-shrink-0" ref={dropdownRef}>
+          <nav className="flex items-center gap-0.5 bg-slate-900/40 p-1 rounded-full border border-white/5 backdrop-blur-md">
             {[...navLinks, ...personalLinks].map((link) => (
                <Link 
                 key={link.path} 
                 to={link.path} 
-                className={`h-10 px-4 lg:px-5 flex items-center justify-center gap-2 rounded-full text-sm font-bold transition-all ${
+                className={`h-9 px-3 lg:px-4 flex items-center justify-center gap-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
                   location.pathname === link.path 
                   ? 'bg-indigo-600 text-white shadow-lg' 
                   : 'text-slate-300 hover:text-white hover:bg-white/10'
@@ -177,29 +177,29 @@ export const Header = () => {
           {/* Genre Dropdown Button */}
           <button
             onClick={() => setActiveDropdown(activeDropdown === 'genre' ? null : 'genre')}
-            className={`h-10 px-3 lg:px-4 flex items-center gap-1.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md ${
+            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-xs font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
               activeDropdown === 'genre'
               ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
               : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            <Tag size={14} />
+            <Tag size={13} />
             <span className="hidden lg:inline">Thể Loại</span>
-            <ChevronDown size={12} className={`transition-transform ${activeDropdown === 'genre' ? 'rotate-180' : ''}`} />
+            <ChevronDown size={11} className={`transition-transform ${activeDropdown === 'genre' ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Country Dropdown Button */}
           <button
             onClick={() => setActiveDropdown(activeDropdown === 'country' ? null : 'country')}
-            className={`h-10 px-3 lg:px-4 flex items-center gap-1.5 rounded-full text-sm font-bold transition-all border backdrop-blur-md ${
+            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-xs font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
               activeDropdown === 'country'
               ? 'bg-purple-600 border-purple-500 text-white shadow-lg'
               : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
             }`}
           >
-            <Globe size={14} />
+            <Globe size={13} />
             <span className="hidden lg:inline">Quốc Gia</span>
-            <ChevronDown size={12} className={`transition-transform ${activeDropdown === 'country' ? 'rotate-180' : ''}`} />
+            <ChevronDown size={11} className={`transition-transform ${activeDropdown === 'country' ? 'rotate-180' : ''}`} />
           </button>
 
           {/* Genre Dropdown Panel */}
