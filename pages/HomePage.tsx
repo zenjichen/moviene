@@ -78,7 +78,7 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/55 to-transparent"></div>
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/20"></div>
                     
-                    <div className="absolute bottom-0 left-0 w-full h-full flex items-center px-4 md:px-12">
+                    <div className="absolute bottom-0 left-0 w-full h-full flex items-center px-4 md:pl-[2.5cm] md:pr-12">
                         <div className="max-w-7xl mx-auto w-full">
                              <div className={`max-w-3xl transition-all duration-1000 delay-300 transform ${isActive ? 'translate-y-0 opacity-100' : 'translate-y-12 opacity-0'}`}>
                                 <div className="flex items-center gap-2 mb-6">
@@ -142,12 +142,12 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
         </button>
 
         {/* Desktop: thumbnail strip with integrated prev/next at bottom-right */}
-        <div className="absolute bottom-8 right-6 z-20 hidden md:flex items-center gap-2">
+        <div className="absolute bottom-8 right-6 z-20 hidden md:flex items-center gap-3">
             <button
                 onClick={prevSlide}
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
             >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={20} />
             </button>
             {movies.map((movie, index) => (
                 <button
@@ -155,8 +155,8 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     onClick={() => setCurrentIndex(index)}
                     className={`relative overflow-hidden rounded-xl transition-all duration-300 flex-shrink-0 ${
                         index === currentIndex
-                            ? 'w-24 h-16 ring-2 ring-indigo-400 ring-offset-1 ring-offset-black/50 scale-105'
-                            : 'w-20 h-14 opacity-50 hover:opacity-80 hover:scale-105'
+                            ? 'w-28 h-[72px] ring-2 ring-indigo-400 ring-offset-2 ring-offset-black/50 scale-105'
+                            : 'w-24 h-16 opacity-50 hover:opacity-80 hover:scale-105'
                     }`}
                 >
                     <img
@@ -172,7 +172,7 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
             ))}
             <button
                 onClick={nextSlide}
-                className="w-9 h-9 flex items-center justify-center rounded-lg bg-black/40 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
+                className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
             >
                 <ChevronRight size={18} />
             </button>
