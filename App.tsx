@@ -170,7 +170,7 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
             style={{ transitionTimingFunction: 'ease-out' }}
         >
           <h1 className="text-5xl md:text-9xl font-black italic tracking-[-0.075em] text-white mb-4 md:mb-6 uppercase">
-            PHAT<span className="text-indigo-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.8)]">MOVIE</span>
+            HÀ<span className="text-indigo-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.8)]">MOVIE</span><span className="text-slate-300 text-3xl md:text-6xl ml-2">HOUSE</span>
           </h1>
           <p className="text-slate-400 text-base md:text-2xl mb-8 md:mb-14 max-w-lg mx-auto font-medium tracking-wide">
             Rạp chiếu phim online miễn phí <br className="hidden md:block"/> <span className="text-slate-500">với chất lượng tuyệt đỉnh.</span>
