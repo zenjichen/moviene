@@ -13,7 +13,7 @@ export const Header = () => {
   const [suggestions, setSuggestions] = useState<Movie[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  
+
   // Badge counts
   const [favCount, setFavCount] = useState(0);
   const [histCount, setHistCount] = useState(0);
@@ -22,7 +22,7 @@ export const Header = () => {
   const [genres, setGenres] = useState<any[]>([]);
   const [countries, setCountries] = useState<any[]>([]);
   const [activeDropdown, setActiveDropdown] = useState<'genre' | 'country' | null>(null);
-  
+
   const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,7 @@ export const Header = () => {
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
-    
+
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowSuggestions(false);
@@ -42,7 +42,7 @@ export const Header = () => {
       }
     };
     window.addEventListener('mousedown', handleClickOutside);
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('mousedown', handleClickOutside);
@@ -53,17 +53,17 @@ export const Header = () => {
   useEffect(() => {
     api.getFilters('the-loai').then(res => {
       setGenres(Array.isArray(res) ? res : (res.data?.items || res.items || []));
-    }).catch(() => {});
+    }).catch(() => { });
     api.getFilters('quoc-gia').then(res => {
       setCountries(Array.isArray(res) ? res : (res.data?.items || res.items || []));
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setShowSuggestions(false);
     setActiveDropdown(null);
-    
+
     // Update badge counts on location change
     setFavCount(storage.getFavorites().length);
     setHistCount(Object.keys(storage.getHistory()).length);
@@ -92,7 +92,7 @@ export const Header = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setSearchQuery(val);
-    
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       fetchSuggestions(val);
@@ -117,10 +117,10 @@ export const Header = () => {
 
   // Improved navigation for suggestions to prevent focus issues
   const navigateTo = (path: string) => {
-      setShowSuggestions(false);
-      setIsMobileMenuOpen(false);
-      setSearchQuery('');
-      navigate(path);
+    setShowSuggestions(false);
+    setIsMobileMenuOpen(false);
+    setSearchQuery('');
+    navigate(path);
   };
 
   const navLinks = [
@@ -135,8 +135,8 @@ export const Header = () => {
     { name: 'Lịch Sử', path: '/lich-su', icon: Clock, bg: 'bg-amber-500/10 border-amber-500/30', activeBg: 'bg-amber-600', textColor: 'text-amber-400', count: histCount },
   ];
 
-  const headerBgClass = isMobileMenuOpen 
-    ? 'bg-slate-950' 
+  const headerBgClass = isMobileMenuOpen
+    ? 'bg-slate-950'
     : (isScrolled ? 'bg-slate-950/95 shadow-2xl border-b border-white/5 backdrop-blur-xl' : 'bg-gradient-to-b from-slate-950/90 to-transparent');
 
   return (
@@ -147,7 +147,7 @@ export const Header = () => {
             <Clapperboard size={24} className="text-white" />
           </div>
           <span className="font-black italic tracking-[-0.075em] text-2xl uppercase text-white">
-              HÀ<span className="text-indigo-500 drop-shadow-[0_0_10px_rgba(99,102,241,0.6)]">MOVIE</span><span className="text-slate-300 text-lg ml-1">HOUSE</span>
+            HÀ<span className="text-indigo-500 drop-shadow-[0_0_10px_rgba(99,102,241,0.6)]">MOVIE</span><span className="text-slate-300 text-lg ml-1">HOUSE</span>
           </span>
         </Link>
 
@@ -155,33 +155,31 @@ export const Header = () => {
         <div className="hidden md:flex items-center gap-1.5 flex-shrink-0" ref={dropdownRef}>
           <nav className="flex items-center gap-0.5 bg-slate-900/40 p-1 rounded-full border border-white/5 backdrop-blur-md">
             {[...navLinks, ...personalLinks].map((link) => (
-               <Link 
-                key={link.path} 
-                to={link.path} 
-                className={`h-9 px-3 lg:px-4 flex items-center justify-center gap-1.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${
-                  location.pathname === link.path 
-                  ? 'bg-indigo-600 text-white shadow-lg' 
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
-                }`}
-               >
-                 <span>{link.name}</span>
-                 {'count' in link && link.count > 0 && (
-                   <span className={`px-1.5 py-0.5 min-w-[1.25rem] text-center rounded-full text-[10px] font-black ${location.pathname === link.path ? 'bg-white text-indigo-600' : 'bg-indigo-500 text-white'}`}>
-                     {link.count}
-                   </span>
-                 )}
-               </Link>
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`h-9 px-3 lg:px-4 flex items-center justify-center gap-1.5 rounded-full text-[13px] font-bold transition-all whitespace-nowrap ${location.pathname === link.path
+                    ? 'bg-indigo-600 text-white shadow-lg'
+                    : 'text-slate-300 hover:text-white hover:bg-white/10'
+                  }`}
+              >
+                <span>{link.name}</span>
+                {'count' in link && link.count > 0 && (
+                  <span className={`px-1.5 py-0.5 min-w-[1.25rem] text-center rounded-full text-[10px] font-black ${location.pathname === link.path ? 'bg-white text-indigo-600' : 'bg-indigo-500 text-white'}`}>
+                    {link.count}
+                  </span>
+                )}
+              </Link>
             ))}
           </nav>
 
           {/* Genre Dropdown Button */}
           <button
             onClick={() => setActiveDropdown(activeDropdown === 'genre' ? null : 'genre')}
-            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-[13px] font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
-              activeDropdown === 'genre'
-              ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
-              : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
+            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-[13px] font-bold transition-all border backdrop-blur-md whitespace-nowrap ${activeDropdown === 'genre'
+                ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg'
+                : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
           >
             <Tag size={13} />
             <span className="hidden lg:inline">Thể Loại</span>
@@ -191,11 +189,10 @@ export const Header = () => {
           {/* Country Dropdown Button */}
           <button
             onClick={() => setActiveDropdown(activeDropdown === 'country' ? null : 'country')}
-            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-[13px] font-bold transition-all border backdrop-blur-md whitespace-nowrap ${
-              activeDropdown === 'country'
-              ? 'bg-purple-600 border-purple-500 text-white shadow-lg'
-              : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
-            }`}
+            className={`h-9 px-3 flex items-center gap-1.5 rounded-full text-[13px] font-bold transition-all border backdrop-blur-md whitespace-nowrap ${activeDropdown === 'country'
+                ? 'bg-purple-600 border-purple-500 text-white shadow-lg'
+                : 'bg-slate-900/40 border-white/5 text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
           >
             <Globe size={13} />
             <span className="hidden lg:inline">Quốc Gia</span>
@@ -248,55 +245,55 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2 relative" ref={searchRef}>
-            <ServerHealthMonitor />
-            <form onSubmit={handleSearch} className="hidden md:flex items-center relative group mb-0">
-                <input 
-                    type="text" 
-                    placeholder="Tìm kiếm phim..." 
-                    className="h-10 bg-black/40 border border-slate-700/50 text-slate-100 text-sm rounded-full pl-10 pr-4 w-44 lg:w-56 focus:w-72 focus:ring-2 focus:ring-indigo-500 outline-none transition-all duration-300 placeholder:text-slate-500 backdrop-blur-md mb-0"
-                    value={searchQuery}
-                    onChange={handleInputChange}
-                    onFocus={() => searchQuery.length >= 2 && fetchSuggestions(searchQuery)}
-                />
-                <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-                  {isSearching ? <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent animate-spin rounded-full"></div> : <Search size={16} className="text-slate-500" />}
-                </div>
-                
-                {showSuggestions && (
-                  <div className="absolute top-full mt-3 left-0 right-0 bg-slate-900 border border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden min-w-[320px] animate-in fade-in slide-in-from-top-2 z-[110]">
-                    <div className="px-3 py-2 bg-slate-800/50 border-b border-slate-800 flex items-center justify-between">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Gợi ý kết quả</span>
-                        <button 
-                            onMouseDown={() => navigateTo(`/tim-kiem?k=${encodeURIComponent(searchQuery.trim())}`)}
-                            className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
-                        >
-                            Xem tất cả
-                        </button>
-                    </div>
-                    {suggestions.map((movie) => (
-                      <button 
-                        key={movie._id} 
-                        onMouseDown={() => navigateTo(`/phim/${movie.slug}`)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-indigo-600/10 group transition-all border-b border-slate-800/30 last:border-0 text-left"
-                      >
-                        <img src={getImageUrl(movie.thumb_url)} alt={movie.name} className="w-10 h-14 object-cover rounded-lg flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-white group-hover:text-indigo-400 truncate">{movie.name}</p>
-                          <p className="text-[11px] text-slate-500 truncate">{movie.year}</p>
-                        </div>
-                        <Play size={14} className="text-indigo-500 opacity-0 group-hover:opacity-100" fill="currentColor" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-            </form>
+          <ServerHealthMonitor />
+          <form onSubmit={handleSearch} className="hidden md:flex items-center relative group mb-0">
+            <input
+              type="text"
+              placeholder="Tìm kiếm phim..."
+              className="h-10 bg-black/40 border border-slate-700/50 text-slate-100 text-sm rounded-full pl-10 pr-4 w-44 lg:w-56 focus:w-72 focus:ring-2 focus:ring-indigo-500 outline-none transition-all duration-300 placeholder:text-slate-500 backdrop-blur-md mb-0"
+              value={searchQuery}
+              onChange={handleInputChange}
+              onFocus={() => searchQuery.length >= 2 && fetchSuggestions(searchQuery)}
+            />
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
+              {isSearching ? <div className="w-4 h-4 border-2 border-indigo-500 border-t-transparent animate-spin rounded-full"></div> : <Search size={16} className="text-slate-500" />}
+            </div>
 
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
-              className={`md:hidden flex items-center justify-center transition-all p-2 ${isMobileMenuOpen ? 'text-indigo-500 scale-110' : 'text-slate-300 hover:text-white'}`}
-            >
-                {isMobileMenuOpen ? <X size={26} /> : <LayoutGrid size={26} />}
-            </button>
+            {showSuggestions && (
+              <div className="absolute top-full mt-3 left-0 right-0 bg-slate-900 border border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden min-w-[320px] animate-in fade-in slide-in-from-top-2 z-[110]">
+                <div className="px-3 py-2 bg-slate-800/50 border-b border-slate-800 flex items-center justify-between">
+                  <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Gợi ý kết quả</span>
+                  <button
+                    onMouseDown={() => navigateTo(`/tim-kiem?k=${encodeURIComponent(searchQuery.trim())}`)}
+                    className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    Xem tất cả
+                  </button>
+                </div>
+                {suggestions.map((movie) => (
+                  <button
+                    key={movie._id}
+                    onMouseDown={() => navigateTo(`/phim/${movie.slug}`)}
+                    className="w-full flex items-center gap-3 p-3 hover:bg-indigo-600/10 group transition-all border-b border-slate-800/30 last:border-0 text-left"
+                  >
+                    <img src={getImageUrl(movie.thumb_url)} alt={movie.name} className="w-10 h-14 object-cover rounded-lg flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white group-hover:text-indigo-400 truncate">{movie.name}</p>
+                      <p className="text-[11px] text-slate-500 truncate">{movie.year}</p>
+                    </div>
+                    <Play size={14} className="text-indigo-500 opacity-0 group-hover:opacity-100" fill="currentColor" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </form>
+
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`md:hidden flex items-center justify-center transition-all p-2 ${isMobileMenuOpen ? 'text-indigo-500 scale-110' : 'text-slate-300 hover:text-white'}`}
+          >
+            {isMobileMenuOpen ? <X size={26} /> : <LayoutGrid size={26} />}
+          </button>
         </div>
       </div>
 
@@ -304,137 +301,134 @@ export const Header = () => {
       {isMobileMenuOpen && (
         <>
           <div className="fixed inset-x-0 top-16 bottom-0 bg-slate-950 z-[90] md:hidden overflow-y-auto animate-in slide-in-from-right duration-300">
-              <div className="p-6 flex flex-col gap-8 pb-12">
-                  {/* Search Section */}
-                  <div className="relative">
-                      <form onSubmit={handleSearch} className="relative group mb-0">
-                          <input 
-                              type="text" 
-                              placeholder="Nhập tên phim bạn muốn tìm..." 
-                              className="relative w-full h-14 bg-slate-900/80 backdrop-blur-md border border-slate-800 text-white rounded-2xl pl-12 pr-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-inner placeholder:text-slate-500 mb-0"
-                              value={searchQuery}
-                              onChange={handleInputChange}
-                          />
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
-                             {isSearching ? <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent animate-spin rounded-full"></div> : <Search size={20} />}
-                          </div>
-                      </form>
-
-                      {/* Mobile Search Suggestions */}
-                      {showSuggestions && searchQuery.length >= 2 && (
-                          <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
-                             <div className="px-4 py-2 bg-slate-800/50 border-b border-slate-800 flex items-center justify-between">
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Gợi ý kết quả</span>
-                                <button 
-                                    onMouseDown={() => navigateTo(`/tim-kiem?k=${encodeURIComponent(searchQuery.trim())}`)}
-                                    className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
-                                >
-                                    Xem tất cả
-                                </button>
-                             </div>
-                             {suggestions.map(movie => (
-                                <button 
-                                    key={movie._id} 
-                                    onMouseDown={() => navigateTo(`/phim/${movie.slug}`)}
-                                    className="w-full flex items-center gap-4 p-4 hover:bg-slate-800 border-b border-slate-800/50 last:border-0 text-left"
-                                >
-                                    <img src={getImageUrl(movie.thumb_url)} className="w-12 h-16 object-cover rounded-lg shadow-md" alt="" />
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-white truncate">{movie.name}</p>
-                                        <p className="text-xs text-slate-500">{movie.year}</p>
-                                    </div>
-                                    <ChevronRight size={16} className="text-slate-600" />
-                                </button>
-                             ))}
-                          </div>
-                      )}
+            <div className="p-6 flex flex-col gap-8 pb-12">
+              {/* Search Section */}
+              <div className="relative">
+                <form onSubmit={handleSearch} className="relative group mb-0">
+                  <input
+                    type="text"
+                    placeholder="Nhập tên phim bạn muốn tìm..."
+                    className="relative w-full h-14 bg-slate-900/80 backdrop-blur-md border border-slate-800 text-white rounded-2xl pl-12 pr-4 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-inner placeholder:text-slate-500 mb-0"
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                  />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                    {isSearching ? <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent animate-spin rounded-full"></div> : <Search size={20} />}
                   </div>
+                </form>
 
-                  {/* Navigation Section */}
-                  <div className="space-y-4">
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1">Khám phá</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                          {navLinks.map(link => (
-                              <Link 
-                                key={link.path} 
-                                to={link.path} 
-                                className={`flex flex-col items-center justify-center gap-3 py-6 rounded-[2rem] border transition-all duration-300 ${
-                                    location.pathname === link.path 
-                                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-600/20' 
-                                    : 'bg-slate-900/50 border-slate-800 text-slate-300 hover:bg-slate-800'
-                                }`}
-                              >
-                                  <div className={`p-3 rounded-2xl ${location.pathname === link.path ? 'bg-white/20' : 'bg-slate-800'}`}>
-                                      <link.icon size={24} className={location.pathname === link.path ? 'text-white' : link.color} />
-                                  </div>
-                                  <span className="text-[11px] font-black uppercase tracking-wider">{link.name}</span>
-                              </Link>
-                          ))}
-                      </div>
-                  </div>
-
-                  {/* Genre Section - Mobile */}
-                  {genres.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2"><Tag size={12} className="text-indigo-400" /> Thể loại phim</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {genres.map(g => (
-                          <Link key={g.slug} to={`/the-loai/${g.slug}`} className="px-3 py-2 bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 text-xs font-bold rounded-xl transition-all">
-                            {g.name}
-                          </Link>
-                        ))}
-                      </div>
+                {/* Mobile Search Suggestions */}
+                {showSuggestions && searchQuery.length >= 2 && (
+                  <div className="mt-4 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
+                    <div className="px-4 py-2 bg-slate-800/50 border-b border-slate-800 flex items-center justify-between">
+                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Gợi ý kết quả</span>
+                      <button
+                        onMouseDown={() => navigateTo(`/tim-kiem?k=${encodeURIComponent(searchQuery.trim())}`)}
+                        className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
+                      >
+                        Xem tất cả
+                      </button>
                     </div>
-                  )}
-
-                  {/* Country Section - Mobile */}
-                  {countries.length > 0 && (
-                    <div className="space-y-4">
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2"><Globe size={12} className="text-purple-400" /> Quốc gia</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {countries.slice(0, 20).map(c => (
-                          <Link key={c.slug} to={`/quoc-gia/${c.slug}`} className="px-3 py-2 bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-purple-600 hover:text-white hover:border-purple-500 text-xs font-bold rounded-xl transition-all">
-                            {c.name}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Personal Section */}
-                  <div className="space-y-4">
-                      <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1">Cá nhân</h3>
-                      <div className="grid grid-cols-2 gap-3">
-                          {personalLinks.map(link => (
-                              <Link 
-                                key={link.path} 
-                                to={link.path} 
-                                className={`flex flex-col items-center justify-center gap-3 py-6 rounded-[2rem] border transition-all duration-300 ${
-                                    location.pathname === link.path 
-                                    ? `${link.activeBg} border-transparent text-white shadow-xl` 
-                                    : `${link.bg} text-slate-300 hover:brightness-125`
-                                }`}
-                              >
-                                  <div className="relative">
-                                      <div className={`p-3 rounded-2xl ${location.pathname === link.path ? 'bg-white/20' : 'bg-slate-900/50'}`}>
-                                          <link.icon size={24} className={location.pathname === link.path ? 'text-white' : link.textColor} />
-                                      </div>
-                                      {link.count > 0 && (
-                                        <span className={`absolute -top-1.5 -right-1.5 min-w-[1.5rem] h-6 flex items-center justify-center rounded-full text-[10px] font-black border-2 ${
-                                            location.pathname === link.path 
-                                            ? 'bg-white text-slate-900 border-indigo-600' 
-                                            : 'bg-indigo-600 text-white border-slate-900'
-                                        } shadow-lg`}>
-                                            {link.count}
-                                        </span>
-                                      )}
-                                  </div>
-                                  <span className="text-[11px] font-black uppercase tracking-wider">{link.name}</span>
-                              </Link>
-                          ))}
-                      </div>
+                    {suggestions.map(movie => (
+                      <button
+                        key={movie._id}
+                        onMouseDown={() => navigateTo(`/phim/${movie.slug}`)}
+                        className="w-full flex items-center gap-4 p-4 hover:bg-slate-800 border-b border-slate-800/50 last:border-0 text-left"
+                      >
+                        <img src={getImageUrl(movie.thumb_url)} className="w-12 h-16 object-cover rounded-lg shadow-md" alt="" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold text-white truncate">{movie.name}</p>
+                          <p className="text-xs text-slate-500">{movie.year}</p>
+                        </div>
+                        <ChevronRight size={16} className="text-slate-600" />
+                      </button>
+                    ))}
                   </div>
+                )}
               </div>
+
+              {/* Navigation Section */}
+              <div className="space-y-4">
+                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1">Khám phá</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {navLinks.map(link => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`flex flex-col items-center justify-center gap-3 py-6 rounded-[2rem] border transition-all duration-300 ${location.pathname === link.path
+                          ? 'bg-indigo-600 border-indigo-500 text-white shadow-xl shadow-indigo-600/20'
+                          : 'bg-slate-900/50 border-slate-800 text-slate-300 hover:bg-slate-800'
+                        }`}
+                    >
+                      <div className={`p-3 rounded-2xl ${location.pathname === link.path ? 'bg-white/20' : 'bg-slate-800'}`}>
+                        <link.icon size={24} className={location.pathname === link.path ? 'text-white' : link.color} />
+                      </div>
+                      <span className="text-[11px] font-black uppercase tracking-wider">{link.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              {/* Genre Section - Mobile */}
+              {genres.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2"><Tag size={12} className="text-indigo-400" /> Thể loại phim</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {genres.map(g => (
+                      <Link key={g.slug} to={`/the-loai/${g.slug}`} className="px-3 py-2 bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-indigo-600 hover:text-white hover:border-indigo-500 text-xs font-bold rounded-xl transition-all">
+                        {g.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Country Section - Mobile */}
+              {countries.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1 flex items-center gap-2"><Globe size={12} className="text-purple-400" /> Quốc gia</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {countries.slice(0, 20).map(c => (
+                      <Link key={c.slug} to={`/quoc-gia/${c.slug}`} className="px-3 py-2 bg-slate-900/80 border border-slate-800 text-slate-300 hover:bg-purple-600 hover:text-white hover:border-purple-500 text-xs font-bold rounded-xl transition-all">
+                        {c.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Personal Section */}
+              <div className="space-y-4">
+                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-1">Cá nhân</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {personalLinks.map(link => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      className={`flex flex-col items-center justify-center gap-3 py-6 rounded-[2rem] border transition-all duration-300 ${location.pathname === link.path
+                          ? `${link.activeBg} border-transparent text-white shadow-xl`
+                          : `${link.bg} text-slate-300 hover:brightness-125`
+                        }`}
+                    >
+                      <div className="relative">
+                        <div className={`p-3 rounded-2xl ${location.pathname === link.path ? 'bg-white/20' : 'bg-slate-900/50'}`}>
+                          <link.icon size={24} className={location.pathname === link.path ? 'text-white' : link.textColor} />
+                        </div>
+                        {link.count > 0 && (
+                          <span className={`absolute -top-1.5 -right-1.5 min-w-[1.5rem] h-6 flex items-center justify-center rounded-full text-[10px] font-black border-2 ${location.pathname === link.path
+                              ? 'bg-white text-slate-900 border-indigo-600'
+                              : 'bg-indigo-600 text-white border-slate-900'
+                            } shadow-lg`}>
+                            {link.count}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-black uppercase tracking-wider">{link.name}</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </>
       )}
@@ -519,7 +513,7 @@ export const ServerHealthMonitor = () => {
         className="w-9 h-9 bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:border-indigo-500/50 transition-all group active:scale-90 relative"
         title="Server Health"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></svg>
         <span className={`absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${isAuthed ? (overallHealth === 'emerald' ? 'bg-emerald-500' : overallHealth === 'amber' ? 'bg-amber-500' : 'bg-red-500') : 'bg-slate-600'} ${isAuthed && servers.some(s => s.status === 'checking') ? 'animate-pulse' : ''}`}></span>
       </button>
 
@@ -528,7 +522,7 @@ export const ServerHealthMonitor = () => {
         <div className="absolute top-full mt-3 right-0 z-[200] w-80 bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><rect width="20" height="8" x="2" y="2" rx="2" ry="2" /><rect width="20" height="8" x="2" y="14" rx="2" ry="2" /><line x1="6" x2="6.01" y1="6" y2="6" /><line x1="6" x2="6.01" y1="18" y2="18" /></svg>
               <h3 className="text-sm font-black text-white uppercase tracking-wider">Server Monitor</h3>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-slate-500 hover:text-white transition-colors">
@@ -572,7 +566,7 @@ export const ServerHealthMonitor = () => {
                 onClick={checkServers}
                 className="w-full h-9 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-95"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 16h5v5" /></svg>
                 Kiểm tra lại
               </button>
               <p className="text-slate-600 text-[9px] text-center">Tự động ping khi mở panel</p>
@@ -588,7 +582,7 @@ export const Footer = () => (
   <footer className="bg-slate-950 pt-16 pb-12 border-t border-slate-900 relative z-10 overflow-hidden">
     {/* Background Glow */}
     <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-full h-64 bg-indigo-600/5 blur-[120px] rounded-full pointer-events-none"></div>
-    
+
     <div className="max-w-7xl mx-auto px-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-16">
         {/* Column 1: Brand */}
@@ -606,7 +600,7 @@ export const Footer = () => (
           </p>
           <div className="flex items-center gap-4">
             <a href="https://www.facebook.com/NguyenManhHaOfficial" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-all hover:-translate-y-1 text-sm font-semibold">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
               Facebook
             </a>
           </div>
@@ -616,24 +610,24 @@ export const Footer = () => (
         <div className="flex flex-col items-center md:items-end gap-4">
           <h4 className="text-white font-black text-sm uppercase tracking-widest border-l-2 border-indigo-500 pl-3">Ủng Hộ Duy Trì Web</h4>
           <div className="bg-white rounded-2xl p-2 shadow-xl shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-shadow">
-            <img 
-              src="https://img.vietqr.io/image/MB-99660999999999-print.png?accountName=NGUYEN%20MANH%20HA" 
-              alt="QR Donate - MB Bank - NGUYEN MANH HA" 
+            <img
+              src="https://img.vietqr.io/image/MB-99660999999999-print.png?accountName=NGUYEN%20MANH%20HA"
+              alt="QR Donate - MB Bank - NGUYEN MANH HA"
               className="w-48 h-auto rounded-xl"
               loading="lazy"
             />
           </div>
           <p className="text-slate-500 text-xs leading-relaxed max-w-sm text-center md:text-right italic">
-            "Mọi sự nỗ lực xây web này đều là miễn phí, một chút tấm lòng cũng sẽ không làm mình giàu thêm, nhưng sẽ duy trì được web được lâu ^^"
+            "Mọi sự nỗ lực xây web này đều là miễn phí, một chút tấm lòng cũng sẽ không làm mình giàu thêm, nhưng sẽ hỗ trợ web được lâu ^^"
           </p>
         </div>
       </div>
 
       <div className="pt-8 border-t border-slate-900/50 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
         <div className="flex flex-col gap-2">
-            <p className="text-xs text-slate-600 font-bold uppercase tracking-[0.2em]">
-              &copy; {new Date().getFullYear()} <span className="text-slate-500">HÀ MOVIE HOUSE</span>. All rights reserved.
-            </p>
+          <p className="text-xs text-slate-600 font-bold uppercase tracking-[0.2em]">
+            &copy; {new Date().getFullYear()} <span className="text-slate-500">HÀ MOVIE HOUSE</span>. All rights reserved.
+          </p>
         </div>
         <div className="flex items-center gap-6">
           <p className="text-[10px] text-slate-700 font-black uppercase tracking-widest">Made with ❤️ for Movie Lovers</p>
@@ -676,17 +670,17 @@ const ScrollToTop = () => {
 };
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const location = useLocation();
-    const isHomePage = location.pathname === '/';
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
-    return (
-        <div className="min-h-screen flex flex-col bg-slate-950 font-sans">
-            <Header />
-            <main className={`flex-1 w-full ${isHomePage ? '' : 'pt-20 md:pt-24 px-4 md:px-[3cm] mx-auto'}`}>
-                {children}
-            </main>
-            <Footer />
-            <ScrollToTop />
-        </div>
-    );
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-950 font-sans">
+      <Header />
+      <main className={`flex-1 w-full ${isHomePage ? '' : 'pt-20 md:pt-24 px-4 md:px-[3cm] mx-auto'}`}>
+        {children}
+      </main>
+      <Footer />
+      <ScrollToTop />
+    </div>
+  );
 };
