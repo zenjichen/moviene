@@ -92,8 +92,8 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
       {/* Dynamic Background Image - Optimized transition */}
       <div
         className={`absolute inset-0 bg-cover bg-center transition-all duration-[1500ms] ${isTransitioning
-            ? 'scale-[1.8] opacity-0 blur-2xl'
-            : isBgLoaded ? 'opacity-40 blur-sm scale-100' : 'opacity-0 scale-100'
+          ? 'scale-[1.8] opacity-0 blur-2xl'
+          : isBgLoaded ? 'opacity-40 blur-sm scale-100' : 'opacity-0 scale-100'
           }`}
         style={{
           backgroundImage: bgUrl ? `url(${bgUrl})` : 'none',
@@ -173,7 +173,7 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
             HÀ <span className="text-indigo-500 drop-shadow-[0_0_25px_rgba(99,102,241,0.8)]">MOVIE</span><span className="text-slate-300 text-3xl md:text-6xl ml-2"> HOUSE</span>
           </h1>
           <p className="text-slate-400 text-base md:text-2xl mb-8 md:mb-14 max-w-lg mx-auto font-medium tracking-wide">
-            Chào mừng các bạn đến vơi rạp chiếu phim online miễn phí <br className="hidden md:block" /> <span className="text-slate-500">với chất lượng tuyệt đỉnh. Đây là một trong những sản phẩm tạo ra với mục đích học tập và không thương mại hoá !</span>
+            Chào mừng các bạn đến vơi rạp chiếu phim online miễn phí với chất lượng tuyệt đỉnh. ❤️<br className="hidden md:block" /> <span className="text-slate-500"> Đây là một trong những sản phẩm tạo ra với mục đích học tập và không thương mại hoá !</span>
           </p>
 
           <button
@@ -188,7 +188,15 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
             <div className="absolute inset-0 rounded-full bg-white blur-md opacity-0 group-hover:opacity-20 transition-opacity"></div>
           </button>
 
-          <p className="mt-8 md:mt-10 text-slate-600 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] opacity-50">Premium Cinematic Experience</p>
+          <p className="mt-8 md:mt-10 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] animate-pulse" style={{
+            background: 'linear-gradient(90deg, #f59e0b, #fbbf24, #fde68a, #fbbf24, #f59e0b)',
+            backgroundSize: '200% auto',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            animation: 'goldShimmer 3s linear infinite',
+            filter: 'drop-shadow(0 0 6px rgba(251,191,36,0.6)) drop-shadow(0 0 20px rgba(245,158,11,0.4)) drop-shadow(0 0 40px rgba(251,191,36,0.2))',
+          }}>Premium Cinematic Experience</p>
         </div>
       </div>
 
@@ -231,6 +239,10 @@ const WelcomePopup = ({ onEnter }: { onEnter: () => void }) => {
         }
         .animate-hyperspace {
           animation: hyperspace 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes goldShimmer {
+          0% { background-position: 200% center; }
+          100% { background-position: -200% center; }
         }
       `}</style>
     </div>
