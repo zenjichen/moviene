@@ -562,7 +562,7 @@ export const HomePage = () => {
     <div className="animate-in fade-in duration-700 pb-4">
       {loading ? <div className="h-screen bg-slate-950 flex items-center justify-center"><Loader /></div> : <HeroSlider movies={data.news?.slice(0, 5) || []} />}
       
-      <div className="max-w-7xl mx-auto px-4 mt-12 md:-mt-24 relative z-10">
+      <div className="max-w-7xl mx-auto px-4 mt-12 md:-mt-8 relative z-10">
           
           {/* 1. PHIM MỚI CẬP NHẬT - PROFESSIONAL SPOTLIGHT GRID */}
           <section className="mb-24 content-auto">
