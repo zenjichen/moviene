@@ -142,12 +142,12 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
         </button>
 
         {/* Desktop: thumbnail strip with integrated prev/next at bottom-right */}
-        <div className="absolute bottom-8 right-6 z-20 hidden md:flex items-center gap-3">
+        <div className="absolute bottom-10 right-6 z-20 hidden md:flex items-center gap-3">
             <button
                 onClick={prevSlide}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
+                className="w-11 h-20 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
             >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={22} />
             </button>
             {movies.map((movie, index) => (
                 <button
@@ -155,8 +155,8 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
                     onClick={() => setCurrentIndex(index)}
                     className={`relative overflow-hidden rounded-xl transition-all duration-300 flex-shrink-0 ${
                         index === currentIndex
-                            ? 'w-28 h-[72px] ring-2 ring-indigo-400 ring-offset-2 ring-offset-black/50 scale-105'
-                            : 'w-24 h-16 opacity-50 hover:opacity-80 hover:scale-105'
+                            ? 'w-32 h-20 ring-2 ring-indigo-400 ring-offset-2 ring-offset-black/50 scale-105'
+                            : 'w-28 h-[72px] opacity-50 hover:opacity-80 hover:scale-105'
                     }`}
                 >
                     <img
@@ -172,7 +172,7 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
             ))}
             <button
                 onClick={nextSlide}
-                className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
+                className="w-11 h-20 flex items-center justify-center rounded-xl bg-black/50 backdrop-blur-md border border-white/10 text-white hover:bg-indigo-600/80 hover:border-indigo-500 transition-all active:scale-90 flex-shrink-0"
             >
                 <ChevronRight size={18} />
             </button>
