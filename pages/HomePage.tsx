@@ -34,20 +34,43 @@ const HeroSlider = ({ movies }: { movies: Movie[] }) => {
     <div className="relative w-full h-[85vh] md:h-screen overflow-hidden group">
         {movies.map((movie, index) => {
             const isActive = index === currentIndex;
-            const bgImage = getImageUrl(movie.poster_url);
-            
+            const bgImage = getImageUrl(movie.thumb_url || movie.poster_url);
+            const posterImage = getImageUrl(movie.poster_url);
+
             return (
                 <div 
                     key={movie._id}
                     className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
                 >
+                    {/* Layer 1: Blurred cinematic background */}
                     <div 
-                        className={`absolute inset-0 bg-cover bg-top transition-transform duration-[12000ms] ease-linear ${isActive ? 'scale-110' : 'scale-100'}`} 
-                        style={{ backgroundImage: `url(${bgImage})` }}
+                        className={`absolute inset-0 bg-cover bg-center transition-transform duration-[12000ms] ease-linear ${isActive ? 'scale-[1.15]' : 'scale-105'}`}
+                        style={{ 
+                            backgroundImage: `url(${bgImage})`,
+                            filter: 'blur(14px) brightness(0.45)',
+                        }}
                     ></div>
-                    
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/40 to-transparent"></div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/30"></div>
+
+                    {/* Layer 2: Sharp poster image on the right with mask fade */}
+                    <div
+                        className="absolute inset-0 hidden sm:block"
+                        style={{
+                            maskImage: 'linear-gradient(to left, black 45%, transparent 82%)',
+                            WebkitMaskImage: 'linear-gradient(to left, black 45%, transparent 82%)',
+                        }}
+                    >
+                        <img
+                            src={posterImage}
+                            alt={movie.name}
+                            className={`absolute right-0 h-full object-cover object-top transition-all duration-1000 ${isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+                            style={{ width: '62%' }}
+                            decoding="async"
+                        />
+                    </div>
+
+                    {/* Layer 3: Gradient overlays for text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/55 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-black/20"></div>
                     
                     <div className="absolute bottom-0 left-0 w-full h-full flex items-end pb-24 md:pb-32 px-4 md:px-12">
                         <div className="max-w-7xl mx-auto w-full">
