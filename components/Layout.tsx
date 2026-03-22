@@ -1059,7 +1059,7 @@ export const DownloadPanel = () => {
             <>
               {/* Primary Download: Windows */}
               {(!isWinHidden || isAdmin) && (
-                <div className="p-4 space-y-4">
+                <div className="p-4 pb-0">
                   <div className={`p-4 bg-gradient-to-br from-slate-900/80 to-slate-800/40 border border-slate-700/40 rounded-2xl space-y-3 relative ${isWinHidden ? 'opacity-50' : ''}`}>
                     {isAdmin && isWinHidden && (
                       <div className="absolute top-2 right-2 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[9px] text-amber-400 font-bold">ẨN với user</div>
@@ -1090,17 +1090,20 @@ export const DownloadPanel = () => {
                       <Download size={15} /> {winLink.label}
                     </a>
                   </div>
+                </div>
+              )}
 
+              {/* Other Platforms Section - Independent of Windows */}
+              {visiblePlatformEntries.length > 0 && (
+                <div className="px-4 pt-4 pb-0 space-y-4">
                   {/* Toggle Other Platforms */}
-                  {visiblePlatformEntries.length > 0 && (
-                    <button
-                      onClick={() => setShowOthers(!showOthers)}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 text-slate-400 hover:text-white text-xs font-bold transition-all"
-                    >
-                      <ChevronDown size={14} className={`transition-transform duration-300 ${showOthers ? 'rotate-180' : ''}`} />
-                      Tải cho nền tảng khác
-                    </button>
-                  )}
+                  <button
+                    onClick={() => setShowOthers(!showOthers)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 text-slate-400 hover:text-white text-xs font-bold transition-all"
+                  >
+                    <ChevronDown size={14} className={`transition-transform duration-300 ${showOthers ? 'rotate-180' : ''}`} />
+                    Tải cho nền tảng khác
+                  </button>
 
                   {/* Other Platforms */}
                   {showOthers && (
