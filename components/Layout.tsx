@@ -672,7 +672,6 @@ type AdminView = 'none' | 'edit-links' | 'settings';
 
 export const DownloadPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showOthers, setShowOthers] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassPrompt, setShowPassPrompt] = useState(false);
   const [passInput, setPassInput] = useState('');
@@ -1057,9 +1056,9 @@ export const DownloadPanel = () => {
           {/* === NORMAL VIEW === */}
           {adminView === 'none' && (
             <>
-              {/* Primary Download: Windows */}
-              {(!isWinHidden || isAdmin) && (
-                <div className="p-4 pb-0">
+              <div className="p-4 space-y-3">
+                {/* Primary Download: Windows */}
+                {(!isWinHidden || isAdmin) && (
                   <div className={`p-4 bg-gradient-to-br from-slate-900/80 to-slate-800/40 border border-slate-700/40 rounded-2xl space-y-3 relative ${isWinHidden ? 'opacity-50' : ''}`}>
                     {isAdmin && isWinHidden && (
                       <div className="absolute top-2 right-2 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[9px] text-amber-400 font-bold">ẨN với user</div>
@@ -1090,70 +1089,55 @@ export const DownloadPanel = () => {
                       <Download size={15} /> {winLink.label}
                     </a>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Other Platforms Section - Independent of Windows */}
-              {visiblePlatformEntries.length > 0 && (
-                <div className="px-4 pt-4 pb-0 space-y-4">
-                  {/* Toggle Other Platforms */}
-                  <button
-                    onClick={() => setShowOthers(!showOthers)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 text-slate-400 hover:text-white text-xs font-bold transition-all"
-                  >
-                    <ChevronDown size={14} className={`transition-transform duration-300 ${showOthers ? 'rotate-180' : ''}`} />
-                    Tải cho nền tảng khác
-                  </button>
+                {/* All Other Visible Platforms - Shown Directly */}
+                {visiblePlatformEntries.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {visiblePlatformEntries.map(([platform, links]) => {
+                      const isPlatformHidden = settings.hiddenPlatforms.includes(platform);
+                      const visibleLinks = links.filter(l => isAdmin || !settings.hiddenLinks.includes(l.id));
+                      if (visibleLinks.length === 0 && !isAdmin) return null;
 
-                  {/* Other Platforms */}
-                  {showOthers && (
-                    <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                      {visiblePlatformEntries.map(([platform, links]) => {
-                        const isPlatformHidden = settings.hiddenPlatforms.includes(platform);
-                        // Filter visible links (unless admin)
-                        const visibleLinks = links.filter(l => isAdmin || !settings.hiddenLinks.includes(l.id));
-                        if (visibleLinks.length === 0 && !isAdmin) return null;
-
-                        return (
-                          <div
-                            key={platform}
-                            className={`p-3 bg-slate-900/60 border ${platformColors[platform] || 'border-slate-700/30'} rounded-2xl space-y-2.5 relative ${platform === 'Smart TV Khác' ? 'col-span-2 sm:col-span-1' : ''} ${isPlatformHidden ? 'opacity-50' : ''}`}
-                          >
-                            {isAdmin && isPlatformHidden && (
-                              <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[8px] text-amber-400 font-bold">ẨN</div>
-                            )}
-                            <div className="flex items-start gap-2">
-                              <div className="p-1.5 bg-red-600/10 border border-red-500/20 rounded-lg flex-shrink-0 mt-0.5">
-                                <PlatformIcon type={links[0].icon} size={14} className="text-red-400" />
-                              </div>
-                              <div className="min-w-0">
-                                <h5 className="text-white text-xs font-bold">{settings.platformLabels[platform] || platform}</h5>
-                                <p className="text-slate-500 text-[10px] leading-relaxed mt-0.5">{settings.platformDescriptions[platform] || ''}</p>
-                              </div>
+                      return (
+                        <div
+                          key={platform}
+                          className={`p-3 bg-slate-900/60 border ${platformColors[platform] || 'border-slate-700/30'} rounded-2xl space-y-2.5 relative ${platform === 'Smart TV Khác' ? 'col-span-2 sm:col-span-1' : ''} ${isPlatformHidden ? 'opacity-50' : ''}`}
+                        >
+                          {isAdmin && isPlatformHidden && (
+                            <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[8px] text-amber-400 font-bold">ẨN</div>
+                          )}
+                          <div className="flex items-start gap-2">
+                            <div className="p-1.5 bg-red-600/10 border border-red-500/20 rounded-lg flex-shrink-0 mt-0.5">
+                              <PlatformIcon type={links[0].icon} size={14} className="text-red-400" />
                             </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {(isAdmin ? links : visibleLinks).map(link => {
-                                const isLinkHidden = settings.hiddenLinks.includes(link.id);
-                                return (
-                                  <a
-                                    key={link.id}
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-[11px] font-bold rounded-lg transition-all active:scale-95 ${isLinkHidden ? 'bg-slate-700/60 opacity-50 line-through' : 'bg-red-600/90 hover:bg-red-700'}`}
-                                  >
-                                    <Download size={11} /> {link.label}
-                                  </a>
-                                );
-                              })}
+                            <div className="min-w-0">
+                              <h5 className="text-white text-xs font-bold">{settings.platformLabels[platform] || platform}</h5>
+                              <p className="text-slate-500 text-[10px] leading-relaxed mt-0.5">{settings.platformDescriptions[platform] || ''}</p>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
+                          <div className="flex flex-wrap gap-1.5">
+                            {(isAdmin ? links : visibleLinks).map(link => {
+                              const isLinkHidden = settings.hiddenLinks.includes(link.id);
+                              return (
+                                <a
+                                  key={link.id}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-[11px] font-bold rounded-lg transition-all active:scale-95 ${isLinkHidden ? 'bg-slate-700/60 opacity-50 line-through' : 'bg-red-600/90 hover:bg-red-700'}`}
+                                >
+                                  <Download size={11} /> {link.label}
+                                </a>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               {/* Footer Tip */}
               <div className="px-4 py-3 border-t border-slate-800/50 bg-slate-900/30">
