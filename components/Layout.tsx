@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, Menu, X, Heart, Clock, Film, Tv, Star, Clapperboard, User, Phone, Play, Filter, Loader2, Zap, Library, ChevronRight, Sparkles, LayoutGrid, ChevronUp, Mail, Send, ShieldCheck, FileText, Info as InfoIcon, ChevronDown, Globe, Tag } from 'lucide-react';
+import { Search, Menu, X, Heart, Clock, Film, Tv, Star, Clapperboard, User, Phone, Play, Filter, Loader2, Zap, Library, ChevronRight, Sparkles, LayoutGrid, ChevronUp, Mail, Send, ShieldCheck, FileText, Info as InfoIcon, ChevronDown, Globe, Tag, Download, Settings, Monitor, Smartphone, Apple, Laptop, TvMinimal, ExternalLink, Check, Pencil } from 'lucide-react';
 import { api, getImageUrl } from '../services/api';
 import { Movie } from '../types';
 import { storage } from '../utils/storage';
@@ -245,6 +245,7 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-2 relative" ref={searchRef}>
+          <DownloadPanel />
           <ServerHealthMonitor />
           <form onSubmit={handleSearch} className="hidden md:flex items-center relative group mb-0">
             <input
@@ -571,6 +572,595 @@ export const ServerHealthMonitor = () => {
               </button>
               <p className="text-slate-600 text-[9px] text-center">Tự động ping khi mở panel</p>
             </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// === DOWNLOAD PANEL ===
+const DOWNLOAD_PASS = '1';
+
+interface DownloadLinkItem {
+  id: string;
+  platform: string;
+  label: string;
+  url: string;
+  icon: string;
+}
+
+interface DownloadSettings {
+  links: DownloadLinkItem[];
+  hiddenPlatforms: string[];      // platforms hidden from users
+  hiddenLinks: string[];           // individual link ids hidden
+  platformDescriptions: Record<string, string>;
+  platformLabels: Record<string, string>;  // custom platform display names
+  footerTip: string;
+  windowsDescription: string;
+}
+
+const DEFAULT_DOWNLOADS: DownloadLinkItem[] = [
+  { id: 'win', platform: 'Windows', label: 'Tải .zip', url: '#', icon: 'monitor' },
+  { id: 'android-phone', platform: 'Android', label: 'Điện Thoại', url: '#', icon: 'smartphone' },
+  { id: 'android-tv', platform: 'Android', label: 'Android TV', url: '#', icon: 'tv' },
+  { id: 'ios-testflight', platform: 'iOS', label: 'Tải qua TestFlight', url: '#', icon: 'apple' },
+  { id: 'ios-activate', platform: 'iOS', label: 'Lấy Mã Kích Hoạt', url: '#', icon: 'apple' },
+  { id: 'ios-ipa', platform: 'iOS', label: 'Tải IPA', url: '#', icon: 'apple' },
+  { id: 'macos', platform: 'macOS', label: 'Tải zip', url: '#', icon: 'laptop' },
+  { id: 'linux', platform: 'Linux', label: 'Tải .zip', url: '#', icon: 'monitor' },
+  { id: 'smarttv', platform: 'Smart TV Khác', label: 'Tham gia nhóm', url: '#', icon: 'tv' },
+];
+
+const DEFAULT_PLATFORM_DESCRIPTIONS: Record<string, string> = {
+  'Android': 'Tải APK và cài đặt trực tiếp.',
+  'iOS': 'Cài qua Testflight hoặc dùng các cách sideload IPA...',
+  'macOS': 'Ứng dụng cho Mac, hỗ trợ Apple Silicon.',
+  'Linux': 'Hỗ trợ các bản phân phối phổ biến (Ubuntu, Fedora...).',
+  'Smart TV Khác': 'Hỗ trợ Apple TV, LG TV và Samsung TV.',
+};
+
+const DEFAULT_FOOTER_TIP = 'Đối với ứng dụng cài qua Testflight khi mở lên lần đầu yêu cầu có mã kích hoạt, hãy bấm vào Lấy Mã Kích Hoạt sau đó điền vào ứng dụng.';
+const DEFAULT_WIN_DESC = 'File .zip giải nén ra để chạy.';
+
+const getSettings = (): DownloadSettings => {
+  try {
+    const saved = localStorage.getItem('hm_dl_settings');
+    if (saved) {
+      const parsed = JSON.parse(saved) as Partial<DownloadSettings>;
+      const links = DEFAULT_DOWNLOADS.map(d => {
+        const found = parsed.links?.find(p => p.id === d.id);
+        return found ? { ...d, url: found.url, label: found.label || d.label } : d;
+      });
+      return {
+        links,
+        hiddenPlatforms: parsed.hiddenPlatforms || [],
+        hiddenLinks: parsed.hiddenLinks || [],
+        platformDescriptions: { ...DEFAULT_PLATFORM_DESCRIPTIONS, ...(parsed.platformDescriptions || {}) },
+        platformLabels: parsed.platformLabels || {},
+        footerTip: parsed.footerTip ?? DEFAULT_FOOTER_TIP,
+        windowsDescription: parsed.windowsDescription ?? DEFAULT_WIN_DESC,
+      };
+    }
+  } catch { }
+  return {
+    links: DEFAULT_DOWNLOADS,
+    hiddenPlatforms: [],
+    hiddenLinks: [],
+    platformDescriptions: { ...DEFAULT_PLATFORM_DESCRIPTIONS },
+    platformLabels: {},
+    footerTip: DEFAULT_FOOTER_TIP,
+    windowsDescription: DEFAULT_WIN_DESC,
+  };
+};
+
+const saveSettings = (settings: DownloadSettings) => {
+  localStorage.setItem('hm_dl_settings', JSON.stringify(settings));
+};
+
+const PlatformIcon = ({ type, size = 18, className = '' }: { type: string; size?: number; className?: string }) => {
+  switch (type) {
+    case 'monitor': return <Monitor size={size} className={className} />;
+    case 'smartphone': return <Smartphone size={size} className={className} />;
+    case 'apple': return <Apple size={size} className={className} />;
+    case 'laptop': return <Laptop size={size} className={className} />;
+    case 'tv': return <TvMinimal size={size} className={className} />;
+    default: return <Download size={size} className={className} />;
+  }
+};
+
+type AdminView = 'none' | 'edit-links' | 'settings';
+
+export const DownloadPanel = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showOthers, setShowOthers] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('dl_admin') === '1');
+  const [showPassPrompt, setShowPassPrompt] = useState(false);
+  const [passInput, setPassInput] = useState('');
+  const [passError, setPassError] = useState(false);
+  const [adminView, setAdminView] = useState<AdminView>('none');
+  const [settings, setSettings] = useState<DownloadSettings>(getSettings);
+  const [editUrls, setEditUrls] = useState<Record<string, string>>({});
+  const [editLabels, setEditLabels] = useState<Record<string, string>>({});
+  const [editDescriptions, setEditDescriptions] = useState<Record<string, string>>({});
+  const [editPlatformLabels, setEditPlatformLabels] = useState<Record<string, string>>({});
+  const [editFooterTip, setEditFooterTip] = useState('');
+  const [editWinDesc, setEditWinDesc] = useState('');
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('mousedown', handleClickOutside);
+    return () => window.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passInput === DOWNLOAD_PASS) {
+      setIsAdmin(true);
+      setPassError(false);
+      setShowPassPrompt(false);
+      sessionStorage.setItem('dl_admin', '1');
+    } else {
+      setPassError(true);
+    }
+  };
+
+  const startEditLinks = () => {
+    const urls: Record<string, string> = {};
+    const labels: Record<string, string> = {};
+    settings.links.forEach(d => { urls[d.id] = d.url; labels[d.id] = d.label; });
+    setEditUrls(urls);
+    setEditLabels(labels);
+    setEditWinDesc(settings.windowsDescription);
+    setAdminView('edit-links');
+  };
+
+  const saveEditLinks = () => {
+    const updated = settings.links.map(d => ({ ...d, url: editUrls[d.id] || d.url, label: editLabels[d.id] || d.label }));
+    const newSettings = { ...settings, links: updated, windowsDescription: editWinDesc };
+    setSettings(newSettings);
+    saveSettings(newSettings);
+    setAdminView('none');
+  };
+
+  const openSettings = () => {
+    setEditDescriptions({ ...settings.platformDescriptions });
+    setEditPlatformLabels({ ...settings.platformLabels });
+    setEditFooterTip(settings.footerTip);
+    setAdminView('settings');
+  };
+
+  const saveSettingsPanel = () => {
+    const newSettings = {
+      ...settings,
+      platformDescriptions: editDescriptions,
+      platformLabels: editPlatformLabels,
+      footerTip: editFooterTip,
+    };
+    setSettings(newSettings);
+    saveSettings(newSettings);
+    setAdminView('none');
+  };
+
+  const togglePlatformVisibility = (platform: string) => {
+    const hidden = [...settings.hiddenPlatforms];
+    const idx = hidden.indexOf(platform);
+    if (idx >= 0) hidden.splice(idx, 1);
+    else hidden.push(platform);
+    const newSettings = { ...settings, hiddenPlatforms: hidden };
+    setSettings(newSettings);
+    saveSettings(newSettings);
+  };
+
+  const toggleLinkVisibility = (linkId: string) => {
+    const hidden = [...settings.hiddenLinks];
+    const idx = hidden.indexOf(linkId);
+    if (idx >= 0) hidden.splice(idx, 1);
+    else hidden.push(linkId);
+    const newSettings = { ...settings, hiddenLinks: hidden };
+    setSettings(newSettings);
+    saveSettings(newSettings);
+  };
+
+  const winLink = settings.links.find(d => d.id === 'win')!;
+  const isWinHidden = settings.hiddenLinks.includes('win');
+  const otherLinks = settings.links.filter(d => d.id !== 'win');
+
+  // Group other links by platform
+  const allPlatforms = Array.from(new Set<string>(otherLinks.map(l => l.platform)));
+  const platformGroups: Record<string, DownloadLinkItem[]> = {};
+  otherLinks.forEach(link => {
+    if (!platformGroups[link.platform]) platformGroups[link.platform] = [];
+    platformGroups[link.platform].push(link);
+  });
+
+  const platformColors: Record<string, string> = {
+    'Android': 'border-emerald-500/30',
+    'iOS': 'border-blue-500/30',
+    'macOS': 'border-slate-400/30',
+    'Linux': 'border-orange-500/30',
+    'Smart TV Khác': 'border-purple-500/30',
+  };
+
+  // For display: filter hidden platforms (unless admin)
+  const visiblePlatformEntries = Object.entries(platformGroups).filter(([platform]) =>
+    isAdmin || !settings.hiddenPlatforms.includes(platform)
+  );
+
+  return (
+    <div className="relative" ref={panelRef}>
+      {/* Download Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-9 h-9 backdrop-blur-md border rounded-xl flex items-center justify-center transition-all group active:scale-90 relative ${
+          isOpen
+            ? 'bg-red-600/80 border-red-500/50 text-white shadow-lg shadow-red-600/20'
+            : 'bg-slate-900/60 border-slate-700/50 text-slate-400 hover:text-white hover:border-red-500/50'
+        }`}
+        title="Tải ứng dụng"
+      >
+        <Download size={16} />
+      </button>
+
+      {/* Panel */}
+      {isOpen && (
+        <div className="absolute top-full mt-3 right-0 z-[200] w-[360px] max-h-[80vh] overflow-y-auto bg-slate-950/95 backdrop-blur-2xl border border-slate-800 rounded-2xl shadow-[0_20px_80px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-top-2 duration-300 no-scrollbar">
+          {/* Header */}
+          <div className="p-4 border-b border-slate-800/80 flex items-center justify-between sticky top-0 bg-slate-950/95 backdrop-blur-2xl z-10 rounded-t-2xl">
+            <div className="flex items-center gap-2.5">
+              <div className="p-1.5 bg-red-600 rounded-lg">
+                <Clapperboard size={14} className="text-white" />
+              </div>
+              <h3 className="text-sm font-black text-white uppercase tracking-wider">
+                {adminView === 'settings' ? 'Cài đặt' : adminView === 'edit-links' ? 'Sửa link' : 'Tải Hà Movie'}
+              </h3>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {isAdmin && adminView === 'none' && (
+                <>
+                  <button
+                    onClick={startEditLinks}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all"
+                    title="Chỉnh sửa link"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={openSettings}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                    title="Cài đặt hiển thị"
+                  >
+                    <Settings size={13} />
+                  </button>
+                </>
+              )}
+              {isAdmin && adminView === 'edit-links' && (
+                <button
+                  onClick={saveEditLinks}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                  title="Lưu thay đổi"
+                >
+                  <Check size={13} />
+                </button>
+              )}
+              {isAdmin && adminView === 'settings' && (
+                <button
+                  onClick={saveSettingsPanel}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                  title="Lưu cài đặt"
+                >
+                  <Check size={13} />
+                </button>
+              )}
+              {isAdmin && adminView !== 'none' && (
+                <button
+                  onClick={() => setAdminView('none')}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/10 transition-all"
+                  title="Quay lại"
+                >
+                  <ChevronDown size={13} className="rotate-90" />
+                </button>
+              )}
+              {!isAdmin && (
+                <button
+                  onClick={() => setShowPassPrompt(!showPassPrompt)}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                  title="Admin"
+                >
+                  <Settings size={13} />
+                </button>
+              )}
+              <button onClick={() => { setIsOpen(false); setAdminView('none'); }} className="text-slate-500 hover:text-white transition-colors ml-1">
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+
+          {/* Admin Password Prompt */}
+          {showPassPrompt && !isAdmin && (
+            <form onSubmit={handleAuth} className="p-4 border-b border-slate-800/80 space-y-3 bg-slate-900/50">
+              <p className="text-slate-400 text-xs text-center">🔒 Nhập mật khẩu admin để quản lý</p>
+              <input
+                type="password"
+                value={passInput}
+                onChange={(e) => { setPassInput(e.target.value); setPassError(false); }}
+                placeholder="Mật khẩu..."
+                className={`w-full h-9 bg-slate-900 border ${passError ? 'border-red-500 ring-1 ring-red-500/30' : 'border-slate-800'} text-white text-sm rounded-xl px-4 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/30 transition-all placeholder:text-slate-600`}
+                autoFocus
+              />
+              {passError && <p className="text-red-400 text-[10px] font-bold text-center">Sai mật khẩu!</p>}
+              <button type="submit" className="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all active:scale-95">
+                Xác nhận
+              </button>
+            </form>
+          )}
+
+          {/* === ADMIN: SETTINGS VIEW === */}
+          {adminView === 'settings' && (
+            <div className="p-4 space-y-5">
+              {/* Platform Visibility Toggles */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Hiển thị nền tảng</h4>
+                
+                {/* Windows toggle */}
+                <div className="flex items-center justify-between p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl">
+                  <div className="flex items-center gap-2.5">
+                    <PlatformIcon type="monitor" size={14} className="text-red-400" />
+                    <span className="text-white text-xs font-bold">Windows</span>
+                    <span className="text-slate-600 text-[10px]">(Chính)</span>
+                  </div>
+                  <button
+                    onClick={() => toggleLinkVisibility('win')}
+                    className={`relative w-10 h-5 rounded-full transition-all duration-300 ${isWinHidden ? 'bg-slate-700' : 'bg-emerald-600'}`}
+                  >
+                    <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${isWinHidden ? 'left-0.5' : 'left-[1.375rem]'}`}></div>
+                  </button>
+                </div>
+
+                {/* Other platform toggles */}
+                {allPlatforms.map(platform => {
+                  const isHidden = settings.hiddenPlatforms.includes(platform);
+                  return (
+                    <div key={platform} className="flex items-center justify-between p-3 bg-slate-900/60 border border-slate-800/50 rounded-xl">
+                      <div className="flex items-center gap-2.5">
+                        <PlatformIcon type={platformGroups[platform]?.[0]?.icon || 'monitor'} size={14} className="text-red-400" />
+                        <span className="text-white text-xs font-bold">{settings.platformLabels[platform] || platform}</span>
+                        {isHidden && <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] text-amber-400 font-bold">ẨN</span>}
+                      </div>
+                      <button
+                        onClick={() => togglePlatformVisibility(platform)}
+                        className={`relative w-10 h-5 rounded-full transition-all duration-300 ${isHidden ? 'bg-slate-700' : 'bg-emerald-600'}`}
+                      >
+                        <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 ${isHidden ? 'left-0.5' : 'left-[1.375rem]'}`}></div>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Individual Link Toggles */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Ẩn/hiện từng nút tải</h4>
+                {settings.links.filter(l => l.id !== 'win').map(link => {
+                  const isLinkHidden = settings.hiddenLinks.includes(link.id);
+                  return (
+                    <div key={link.id} className="flex items-center justify-between p-2.5 bg-slate-900/40 border border-slate-800/30 rounded-xl">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <PlatformIcon type={link.icon} size={12} className="text-slate-500 flex-shrink-0" />
+                        <span className="text-slate-300 text-[11px] font-medium truncate">{link.platform} — {link.label}</span>
+                        {isLinkHidden && <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] text-amber-400 font-bold flex-shrink-0">ẨN</span>}
+                      </div>
+                      <button
+                        onClick={() => toggleLinkVisibility(link.id)}
+                        className={`relative w-9 h-[18px] rounded-full transition-all duration-300 flex-shrink-0 ml-2 ${isLinkHidden ? 'bg-slate-700' : 'bg-emerald-600'}`}
+                      >
+                        <div className={`absolute top-[2px] w-3.5 h-3.5 bg-white rounded-full shadow-md transition-all duration-300 ${isLinkHidden ? 'left-[2px]' : 'left-[1.125rem]'}`}></div>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Edit Descriptions */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Mô tả nền tảng</h4>
+                {allPlatforms.map(platform => (
+                  <div key={platform} className="space-y-1">
+                    <label className="text-[10px] text-slate-500 font-bold">{platform}</label>
+                    <input
+                      type="text"
+                      value={editDescriptions[platform] || ''}
+                      onChange={e => setEditDescriptions({ ...editDescriptions, [platform]: e.target.value })}
+                      placeholder={DEFAULT_PLATFORM_DESCRIPTIONS[platform] || 'Mô tả...'}
+                      className="w-full h-7 bg-slate-900 border border-slate-800 text-white text-[10px] rounded-lg px-2.5 outline-none focus:border-indigo-500 transition-all placeholder:text-slate-700"
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer Tip */}
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Mẹo cuối panel</h4>
+                <textarea
+                  value={editFooterTip}
+                  onChange={e => setEditFooterTip(e.target.value)}
+                  placeholder="Nội dung mẹo hiển thị cuối panel..."
+                  rows={3}
+                  className="w-full bg-slate-900 border border-slate-800 text-white text-[10px] rounded-lg p-2.5 outline-none focus:border-indigo-500 transition-all placeholder:text-slate-700 resize-none leading-relaxed"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* === ADMIN: EDIT LINKS VIEW === */}
+          {adminView === 'edit-links' && (
+            <div className="p-4 space-y-4">
+              {/* Windows */}
+              <div className="p-3 bg-slate-900/60 border border-slate-700/40 rounded-xl space-y-2">
+                <div className="flex items-center gap-2">
+                  <Monitor size={14} className="text-red-400" />
+                  <span className="text-white text-xs font-bold">Windows</span>
+                </div>
+                <input
+                  type="text"
+                  value={editLabels['win'] || ''}
+                  onChange={e => setEditLabels({ ...editLabels, win: e.target.value })}
+                  placeholder="Tên nút (VD: Tải .zip)"
+                  className="w-full h-7 bg-slate-800 border border-slate-700/50 text-white text-[10px] rounded-lg px-2.5 outline-none focus:border-indigo-500 transition-all placeholder:text-slate-600"
+                />
+                <input
+                  type="text"
+                  value={editUrls['win'] || ''}
+                  onChange={e => setEditUrls({ ...editUrls, win: e.target.value })}
+                  placeholder="URL download..."
+                  className="w-full h-7 bg-slate-800 border border-amber-500/30 text-white text-[10px] rounded-lg px-2.5 outline-none focus:border-amber-400 transition-all placeholder:text-slate-600 font-mono"
+                />
+                <input
+                  type="text"
+                  value={editWinDesc}
+                  onChange={e => setEditWinDesc(e.target.value)}
+                  placeholder="Mô tả (VD: File .zip giải nén ra để chạy.)"
+                  className="w-full h-7 bg-slate-800 border border-slate-700/50 text-white text-[10px] rounded-lg px-2.5 outline-none focus:border-indigo-500 transition-all placeholder:text-slate-600"
+                />
+              </div>
+
+              {/* Other links */}
+              {settings.links.filter(l => l.id !== 'win').map(link => (
+                <div key={link.id} className="p-3 bg-slate-900/40 border border-slate-800/30 rounded-xl space-y-2">
+                  <div className="flex items-center gap-2">
+                    <PlatformIcon type={link.icon} size={12} className="text-slate-500" />
+                    <span className="text-slate-300 text-[11px] font-bold">{link.platform}</span>
+                    {settings.hiddenLinks.includes(link.id) && <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[9px] text-amber-400 font-bold">ẨN</span>}
+                  </div>
+                  <input
+                    type="text"
+                    value={editLabels[link.id] || ''}
+                    onChange={e => setEditLabels({ ...editLabels, [link.id]: e.target.value })}
+                    placeholder={`Tên nút (VD: ${link.label})`}
+                    className="w-full h-7 bg-slate-800 border border-slate-700/50 text-white text-[10px] rounded-lg px-2.5 outline-none focus:border-indigo-500 transition-all placeholder:text-slate-600"
+                  />
+                  <input
+                    type="text"
+                    value={editUrls[link.id] || ''}
+                    onChange={e => setEditUrls({ ...editUrls, [link.id]: e.target.value })}
+                    placeholder="URL download..."
+                    className="w-full h-7 bg-slate-800 border border-amber-500/30 text-white text-[10px] rounded-lg px-2.5 outline-none focus:border-amber-400 transition-all placeholder:text-slate-600 font-mono"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* === NORMAL VIEW === */}
+          {adminView === 'none' && (
+            <>
+              {/* Primary Download: Windows */}
+              {(!isWinHidden || isAdmin) && (
+                <div className="p-4 space-y-4">
+                  <div className={`p-4 bg-gradient-to-br from-slate-900/80 to-slate-800/40 border border-slate-700/40 rounded-2xl space-y-3 relative ${isWinHidden ? 'opacity-50' : ''}`}>
+                    {isAdmin && isWinHidden && (
+                      <div className="absolute top-2 right-2 px-2 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded-lg text-[9px] text-amber-400 font-bold">ẨN với user</div>
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 bg-red-600/10 border border-red-500/20 rounded-xl">
+                        <Monitor size={20} className="text-red-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-white font-bold text-sm">Tải về cho Windows</h4>
+                        <p className="text-slate-500 text-[11px] mt-0.5">{settings.windowsDescription}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 justify-center">
+                      <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-800/80 border border-slate-700/50 rounded-full text-[11px] text-slate-400 font-medium">
+                        <Monitor size={12} /> Nền tảng: <span className="text-white font-bold">Windows</span>
+                      </span>
+                      <span className="flex items-center gap-1 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[11px] text-emerald-400 font-medium">
+                        <Check size={11} /> Hỗ trợ tốt
+                      </span>
+                    </div>
+                    <a
+                      href={winLink.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full h-10 bg-red-600 hover:bg-red-700 text-white text-sm font-bold rounded-xl transition-all active:scale-95 shadow-lg shadow-red-600/20"
+                    >
+                      <Download size={15} /> {winLink.label}
+                    </a>
+                  </div>
+
+                  {/* Toggle Other Platforms */}
+                  {visiblePlatformEntries.length > 0 && (
+                    <button
+                      onClick={() => setShowOthers(!showOthers)}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 text-slate-400 hover:text-white text-xs font-bold transition-all"
+                    >
+                      <ChevronDown size={14} className={`transition-transform duration-300 ${showOthers ? 'rotate-180' : ''}`} />
+                      Tải cho nền tảng khác
+                    </button>
+                  )}
+
+                  {/* Other Platforms */}
+                  {showOthers && (
+                    <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                      {visiblePlatformEntries.map(([platform, links]) => {
+                        const isPlatformHidden = settings.hiddenPlatforms.includes(platform);
+                        // Filter visible links (unless admin)
+                        const visibleLinks = links.filter(l => isAdmin || !settings.hiddenLinks.includes(l.id));
+                        if (visibleLinks.length === 0 && !isAdmin) return null;
+
+                        return (
+                          <div
+                            key={platform}
+                            className={`p-3 bg-slate-900/60 border ${platformColors[platform] || 'border-slate-700/30'} rounded-2xl space-y-2.5 relative ${platform === 'Smart TV Khác' ? 'col-span-2 sm:col-span-1' : ''} ${isPlatformHidden ? 'opacity-50' : ''}`}
+                          >
+                            {isAdmin && isPlatformHidden && (
+                              <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 rounded text-[8px] text-amber-400 font-bold">ẨN</div>
+                            )}
+                            <div className="flex items-start gap-2">
+                              <div className="p-1.5 bg-red-600/10 border border-red-500/20 rounded-lg flex-shrink-0 mt-0.5">
+                                <PlatformIcon type={links[0].icon} size={14} className="text-red-400" />
+                              </div>
+                              <div className="min-w-0">
+                                <h5 className="text-white text-xs font-bold">{settings.platformLabels[platform] || platform}</h5>
+                                <p className="text-slate-500 text-[10px] leading-relaxed mt-0.5">{settings.platformDescriptions[platform] || ''}</p>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(isAdmin ? links : visibleLinks).map(link => {
+                                const isLinkHidden = settings.hiddenLinks.includes(link.id);
+                                return (
+                                  <a
+                                    key={link.id}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-[11px] font-bold rounded-lg transition-all active:scale-95 ${isLinkHidden ? 'bg-slate-700/60 opacity-50 line-through' : 'bg-red-600/90 hover:bg-red-700'}`}
+                                  >
+                                    <Download size={11} /> {link.label}
+                                  </a>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Footer Tip */}
+              <div className="px-4 py-3 border-t border-slate-800/50 bg-slate-900/30">
+                <p className="text-slate-600 text-[10px] leading-relaxed text-center">
+                  <span className="text-slate-500 font-bold">Mẹo:</span> {settings.footerTip}
+                </p>
+              </div>
+            </>
           )}
         </div>
       )}
