@@ -450,7 +450,7 @@ interface ServerStatus {
 
 export const ServerHealthMonitor = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isAuthed, setIsAuthed] = useState(() => sessionStorage.getItem('shm_auth') === '1');
+  const [isAuthed, setIsAuthed] = useState(false);
   const [passInput, setPassInput] = useState('');
   const [passError, setPassError] = useState(false);
   const [servers, setServers] = useState<ServerStatus[]>([
@@ -480,7 +480,6 @@ export const ServerHealthMonitor = () => {
     if (passInput === SERVER_PASS) {
       setIsAuthed(true);
       setPassError(false);
-      sessionStorage.setItem('shm_auth', '1');
       checkServers();
     } else {
       setPassError(true);
@@ -674,7 +673,7 @@ type AdminView = 'none' | 'edit-links' | 'settings';
 export const DownloadPanel = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showOthers, setShowOthers] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('dl_admin') === '1');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showPassPrompt, setShowPassPrompt] = useState(false);
   const [passInput, setPassInput] = useState('');
   const [passError, setPassError] = useState(false);
@@ -704,7 +703,6 @@ export const DownloadPanel = () => {
       setIsAdmin(true);
       setPassError(false);
       setShowPassPrompt(false);
-      sessionStorage.setItem('dl_admin', '1');
     } else {
       setPassError(true);
     }
