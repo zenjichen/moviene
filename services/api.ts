@@ -4,6 +4,7 @@ import { ApiResponseList, ApiResponseSearch, MovieDetail, ServerData } from '../
 const BASE_URL = 'https://phimapi.com';
 const NGUONC_BASE_URL = 'https://phim.nguonc.com/api';
 const OPHIM_BASE_URL = 'https://ophim1.com';
+const VSMOV_BASE_URL = 'https://vsmov.com/api';
 
 const IMG_PREFIX = 'https://phimimg.com/';
 const NGUONC_IMG_PREFIX = 'https://phim.nguonc.com/';
@@ -41,19 +42,50 @@ export const getImageUrl = (url: string) => {
   return `https://images.weserv.nl/?url=${encodeURIComponent(fullUrl)}&output=webp&q=80`;
 };
 
+// Normalize VSMov items (images are already absolute URLs)
+const normalizeVSMovItems = (items: any[]): any[] => {
+  return items.map(item => ({
+    ...item,
+    thumb_url: item.thumb_url || item.poster_url || '',
+    poster_url: item.poster_url || item.thumb_url || ''
+  }));
+};
+
 export const api = {
-  // === PRIMARY: OPhim | FALLBACK: PhimAPI ===
+  // === PRIMARY: OPhim | FALLBACK: PhimAPI | EXTRA: VSMov ===
 
   getNewUpdates: async (page = 1): Promise<ApiResponseList<any>> => {
     try {
-      const res = await fetch(`${OPHIM_BASE_URL}/v1/api/danh-sach/phim-moi-cap-nhat?page=${page}`);
-      const json = await res.json();
-      if (json.status === 'success' && json.data?.items) {
-        const items = normalizeOPhimItems(json.data.items);
-        return { status: true, items, pathImage: '', pagination: json.data.params?.pagination || {} } as any;
+      const [ophimRes, vsmovRes] = await Promise.allSettled([
+        fetch(`${OPHIM_BASE_URL}/v1/api/danh-sach/phim-moi-cap-nhat?page=${page}`).then(r => r.json()),
+        fetch(`${VSMOV_BASE_URL}/danh-sach/phim-moi-cap-nhat?page=${page}`).then(r => r.json())
+      ]);
+
+      const ophimItems = (ophimRes.status === 'fulfilled' && ophimRes.value?.status === 'success')
+        ? normalizeOPhimItems(ophimRes.value.data?.items || [])
+        : [];
+      const vsmovItems = (vsmovRes.status === 'fulfilled' && vsmovRes.value?.status === true)
+        ? normalizeVSMovItems(vsmovRes.value.items || [])
+        : [];
+
+      // Merge: OPhim first, then VSMov (dedup by slug)
+      const seenSlugs = new Set(ophimItems.map((m: any) => m.slug));
+      const merged = [...ophimItems];
+      vsmovItems.forEach((m: any) => {
+        if (!seenSlugs.has(m.slug)) {
+          merged.push(m);
+          seenSlugs.add(m.slug);
+        }
+      });
+
+      if (merged.length > 0) {
+        const pagination = (ophimRes.status === 'fulfilled' && ophimRes.value?.data?.params?.pagination)
+          ? ophimRes.value.data.params.pagination
+          : (vsmovRes.status === 'fulfilled' ? vsmovRes.value?.pagination || {} : {});
+        return { status: true, items: merged, pathImage: '', pagination } as any;
       }
-      throw new Error('OPhim failed');
-    } catch (error) {
+      throw new Error('All sources failed');
+    } catch {
       try {
         const fallback = await fetch(`${BASE_URL}/danh-sach/phim-moi-cap-nhat-v3?page=${page}`);
         return await fallback.json();
@@ -215,11 +247,37 @@ export const api = {
     }
   },
 
+  getMovieDetailVSMov: async (slug: string) => {
+    try {
+      const res = await fetch(`${VSMOV_BASE_URL}/phim/${slug}`);
+      const data = await res.json();
+      if (!data.status || !data.movie) return null;
+
+      const m = data.movie;
+      // VSMov episodes always [] currently, but map them if they exist in the future
+      const episodes: ServerData[] = (m.episodes || []).map((srv: any) => ({
+        server_name: `VSMov - ${srv.server_name || 'Server 1'}`,
+        server_data: (srv.items || srv.server_data || []).map((item: any) => ({
+          name: item.name,
+          slug: item.slug,
+          filename: item.name,
+          link_embed: item.embed || item.link_embed,
+          link_m3u8: item.m3u8 || item.link_m3u8
+        }))
+      }));
+
+      return { movie: m, episodes };
+    } catch (e) {
+      return null;
+    }
+  },
+
   getMovieDetail: async (slug: string): Promise<{ status: boolean; movie: MovieDetail; episodes: ServerData[] }> => {
-    const [mainRes, ophimRes, nguonCRes] = await Promise.allSettled([
+    const [mainRes, ophimRes, nguonCRes, vsmovRes] = await Promise.allSettled([
         api.getMovieDetailMain(slug),
         api.getMovieDetailOPhim(slug),
-        api.getMovieDetailNguonC(slug)
+        api.getMovieDetailNguonC(slug),
+        api.getMovieDetailVSMov(slug)
     ]);
 
     let mainMovie: MovieDetail | null = null;
@@ -310,6 +368,37 @@ export const api = {
         allEpisodes = [...allEpisodes, ...nguonCRes.value.episodes];
     }
 
+    if (vsmovRes.status === 'fulfilled' && vsmovRes.value) {
+        const m = vsmovRes.value.movie;
+        if (!mainMovie) {
+            mainMovie = {
+                _id: m._id || m.slug,
+                name: m.name,
+                slug: m.slug,
+                origin_name: m.origin_name || m.name,
+                poster_url: m.poster_url || m.thumb_url || '',
+                thumb_url: m.thumb_url || m.poster_url || '',
+                year: m.year,
+                content: m.content || 'Đang cập nhật...',
+                lang: m.lang || 'N/A',
+                quality: m.quality || 'HD',
+                category: (m.category || []).map((c: any) => ({ id: c.id || c.name, name: c.name, slug: c.slug })),
+                country: (m.country || []).map((c: any) => ({ id: c.id || c.name, name: c.name, slug: c.slug })),
+                status: m.status || 'completed',
+                is_copyright: m.is_copyright || false,
+                sub_docquyen: m.sub_docquyen || false,
+                chieurap: m.chieurap || false,
+                trailer_url: m.trailer_url || '',
+                episode_current: m.episode_current || '',
+                episode_total: m.episode_total || '',
+                episodes: [],
+                actor: []
+            };
+        }
+        normalizeActors(m.actor).forEach((a: string) => actorPool.add(a));
+        allEpisodes = [...allEpisodes, ...vsmovRes.value.episodes];
+    }
+
     if (!mainMovie) throw new Error("Movie not found");
 
     const finalActors = Array.from(actorPool).sort((a, b) => {
@@ -335,15 +424,17 @@ export const api = {
     // OPhim often has better keyword indexing for actors, so we try multiple sources
     const fetchFromSources = async (kw: string) => {
       try {
-        const [resOphim, resMain, resNguonc] = await Promise.allSettled([
+        const [resOphim, resMain, resNguonc, resVsmov] = await Promise.allSettled([
           fetch(`${OPHIM_BASE_URL}/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}&limit=${limit}`).then(r => r.json()),
           fetch(`${BASE_URL}/v1/api/tim-kiem?keyword=${encodeURIComponent(kw)}&limit=${limit}`).then(r => r.json()),
-          fetch(`${NGUONC_BASE_URL}/search?keyword=${encodeURIComponent(kw)}`).then(r => r.json())
+          fetch(`${NGUONC_BASE_URL}/search?keyword=${encodeURIComponent(kw)}`).then(r => r.json()),
+          fetch(`${VSMOV_BASE_URL}/tim-kiem?keyword=${encodeURIComponent(kw)}&limit=${limit}`).then(r => r.json())
         ]);
 
         const itemsOphim = resOphim.status === 'fulfilled' ? (resOphim.value.data?.items || resOphim.value.items || []) : [];
         const itemsMain = resMain.status === 'fulfilled' ? (resMain.value.data?.items || resMain.value.items || []) : [];
         const itemsNguonc = resNguonc.status === 'fulfilled' ? (resNguonc.value.data?.items || resNguonc.value.items || []) : [];
+        const itemsVsmov = resVsmov.status === 'fulfilled' ? (resVsmov.value.items || []) : [];
 
         // Priority merge: OPhim results often match actor keywords better than Main Source which is very title-strict
         const combined = [...itemsOphim];
@@ -384,6 +475,24 @@ export const api = {
             seenSlugs.add(m.slug);
           }
         });
+
+        itemsVsmov.forEach((m: any) => {
+          if (!seenSlugs.has(m.slug)) {
+            combined.push({
+              _id: m._id || m.slug,
+              name: m.name,
+              slug: m.slug,
+              origin_name: m.origin_name || m.name,
+              thumb_url: m.thumb_url || m.poster_url || '',
+              poster_url: m.poster_url || m.thumb_url || '',
+              year: m.year,
+              lang: m.lang,
+              quality: m.quality
+            });
+            seenSlugs.add(m.slug);
+          }
+        });
+
         return combined;
       } catch (e) { return []; }
     };
